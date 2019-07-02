@@ -1,0 +1,30 @@
+{
+  "name": "scrypta-id-engine",
+  "version": "1.0.0",
+  "description": "ScryptaID engine powered by PassportJS",
+  "main": "idengine.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node idengine.js",
+    "dev": "nodemon idengine.js"
+  },
+  "author": "Scrypta Task Force",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "body-parser": "^1.19.0",
+    "coinkey": "^3.0.0",
+    "cookie-parser": "^1.4.4",
+    "crypto-js": "^3.1.9-1",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "passport": "^0.4.0",
+    "passport-github": "^1.1.0",
+    "secp256k1": "^3.7.1",
+    "secure-random": "^1.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
