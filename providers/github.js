@@ -17,7 +17,10 @@ router.get('/github/:privkey',
 );
 router.get('/auth/github', passport.authenticate('github'));
 router.get('/auth/github/callback', 
-    passport.authenticate('github', { failureRedirect: '/auth/github' })
+    passport.authenticate('github', { failureRedirect: '/auth/error', session: false }),
+    function(req, res) {
+        res.json(req.session.github);
+    }
 );
 
 passport.use(new GitHubStrategy({
@@ -26,20 +29,22 @@ passport.use(new GitHubStrategy({
     callbackURL: process.env.GITHUB_CALLBACK,
     passReqToCallback: true
   },
-  function(req, accessToken, refreshToken, profile, cb) {
+  function(req, accessToken, refreshToken, profile, done) {
     let githubID = {
         username: profile.username,
         id: profile.id,
         token: accessToken
     }
     sign.signWithKey(req.session.privkey, JSON.stringify(githubID)).then(signature => {
-        let ID = {
+        let github = {
             profile: githubID,
             signature: signature.signature,
             address: signature.address,
             pubKey: signature.pubKey
         }
-        return cb(JSON.stringify(ID))
+        console.log('Authentication done and signed.')
+        req.session.github = github
+        return done(null, github)
     })
   }
 ));

@@ -19,4 +19,11 @@ app.use(session({
 var github = require('./providers/github.js');
 app.use('/', github);
 
+var google = require('./providers/google.js');
+app.use('/', google);
+
+app.get('/auth/error', function (req, res) {
+    res.json({message: 'Authentication failed', status: 401})
+})
+
 app.listen(port, () => console.log(`ScryptaID Engine listening on port ${port}!`))
