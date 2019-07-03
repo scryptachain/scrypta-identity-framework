@@ -22,6 +22,9 @@ app.use('/', github);
 var google = require('./providers/google.js');
 app.use('/', google);
 
+var twitter = require('./providers/twitter.js');
+app.use('/', twitter);
+
 app.get('/auth/error', function (req, res) {
     res.json({message: 'Authentication failed', status: 401})
 })
