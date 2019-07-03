@@ -7,6 +7,14 @@ app.use(require('cookie-parser')())
 app.use(require('body-parser').urlencoded({ extended: true }))
 app.use(passport.initialize())
 const port = process.env.ENGINE_PORT
+var session = require('express-session')
+app.set('trust proxy', 1)
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,  
+    resave: false,
+    saveUninitialized: true
+}))
 
 var github = require('./providers/github.js');
 app.use('/', github);

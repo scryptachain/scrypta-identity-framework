@@ -24,7 +24,8 @@ module.exports = {
 
             response({
                 signature: sigObj.signature.toString('hex'),
-                pubKey: pubKey.toString('hex')
+                pubKey: pubKey.toString('hex'),
+                address: ck.publicAddress
             })
         })
     },

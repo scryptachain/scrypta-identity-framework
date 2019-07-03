@@ -5,18 +5,46 @@ require('dotenv').config()
 const sign = require('../libs/sign.js')
 
 var GitHubStrategy = require('passport-github').Strategy;
-var privKeyTest = 'Spv2RHfg2sheqCmLAvPsyGgTHYDCvKe9tS9yH47jzwEsFVCWe9mP'
 var router = express.Router();
 
-router.get('/auth/github',passport.authenticate('github'));
-router.get('/auth/github/callback', 
-    passport.authenticate('github', { failureRedirect: '/auth/github' }),
-    function(req, res) {
-        res.redirect('/');
+router.get('/github/:privkey', 
+    function(req, res){
+        console.log('Requested GitHub authentication.')
+        var privkey = req.params.privkey
+        req.session.privkey = privkey
+        res.redirect('/auth/github');
     }
 );
+router.get('/auth/github', passport.authenticate('github'));
+router.get('/auth/github/callback', 
+    passport.authenticate('github', { failureRedirect: '/auth/github' })
+);
 
-router.get('/auth/github/verify/:token', function(req, res){ // example: /auth/github/verify/fafdfd02c4b0071d2b36a81f374eb8c95f124c71
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENTID,
+    clientSecret: process.env.GITHUB_CLIENTSECRET,
+    callbackURL: process.env.GITHUB_CALLBACK,
+    passReqToCallback: true
+  },
+  function(req, accessToken, refreshToken, profile, cb) {
+    let githubID = {
+        username: profile.username,
+        id: profile.id,
+        token: accessToken
+    }
+    sign.signWithKey(req.session.privkey, JSON.stringify(githubID)).then(signature => {
+        let ID = {
+            profile: githubID,
+            signature: signature.signature,
+            address: signature.address,
+            pubKey: signature.pubKey
+        }
+        return cb(JSON.stringify(ID))
+    })
+  }
+));
+
+router.get('/github/verify/:token', function(req, res){
     let token = req.params.token
     if(token !== undefined){
         axios.get('https://api.github.com/user', { params: {access_token: token }}).then(result => {
@@ -26,28 +54,5 @@ router.get('/auth/github/verify/:token', function(req, res){ // example: /auth/g
         })
     }
 })
-
-passport.use(new GitHubStrategy({
-    clientID: process.env.GITHUB_CLIENTID,
-    clientSecret: process.env.GITHUB_CLIENTSECRET,
-    callbackURL: process.env.GITHUB_CALLBACK
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    let githubID = {
-        username: profile.username,
-        id: profile.id,
-        token: accessToken
-    }
-    
-    sign.signWithKey(privKeyTest, JSON.stringify(githubID)).then(signature => {
-        let ID = {
-            profile: githubID,
-            signature: signature.signature,
-            pubKey: signature.pubKey
-        }
-        return cb(JSON.stringify(ID))
-    })
-  }
-));
 
 module.exports = router;
