@@ -30,10 +30,12 @@ passport.use(new TwitterStrategy({
     passReqToCallback: true
   },
   function(req, accessToken, refreshToken, profile, done) {
+      
     let twitterID = {
         name: profile.displayName,
         id: profile.id,
-        token: accessToken
+        token: accessToken,
+        created_at: Date.now()
     }
     sign.signWithKey(req.session.privkey, JSON.stringify(twitterID)).then(signature => {
         let twitter = {

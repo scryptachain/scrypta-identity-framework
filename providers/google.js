@@ -33,7 +33,8 @@ passport.use(new GoogleStrategy({
     let googleID = {
         name: profile.displayName,
         id: profile.id,
-        token: accessToken
+        token: accessToken,
+        created_at: Date.now()
     }
     sign.signWithKey(req.session.privkey, JSON.stringify(googleID)).then(signature => {
         let google = {

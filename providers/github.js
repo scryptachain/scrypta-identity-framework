@@ -33,7 +33,8 @@ passport.use(new GitHubStrategy({
     let githubID = {
         username: profile.username,
         id: profile.id,
-        token: accessToken
+        token: accessToken,
+        created_at: Date.now()
     }
     sign.signWithKey(req.session.privkey, JSON.stringify(githubID)).then(signature => {
         let github = {
