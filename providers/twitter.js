@@ -35,7 +35,6 @@ passport.use(new TwitterStrategy({
         id: profile.id,
         token: accessToken
     }
-    console.log(profile)
     sign.signWithKey(req.session.privkey, JSON.stringify(twitterID)).then(signature => {
         let twitter = {
             profile: twitterID,
