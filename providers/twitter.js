@@ -37,11 +37,11 @@ passport.use(new TwitterStrategy({
         token: accessToken,
         created_at: Date.now()
     }
-    sign.signWithKey(process.env.PROVIDER_PRV, JSON.stringify(twitterID)).then(signature => {
+    sign.signWithKey(process.env.GATEWAY_PRV, JSON.stringify(twitterID)).then(signature => {
         req.session.twitter = {
             identity: twitterID,
             fingerprint: signature.signature,
-            provider: signature.pubKey
+            gateway: signature.pubKey
         }
         return done(null, twitterID)
     })

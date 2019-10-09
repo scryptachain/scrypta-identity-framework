@@ -40,7 +40,7 @@
                         </p>
                     </div>
                 </div>
-                <div class="col-xl-4 offset-xl-4 col-pad-0 bg-color-7" v-if="address">
+                <div class="col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-pad-0 bg-color-7" v-if="address">
                     <div class="logo" style="position:fixed; top:20px; left:20px;">
                         <a href="#"></a>
                             <img src="assets/logo_dark.png" alt="logo">
@@ -48,13 +48,14 @@
                     </div>
                     <div class="login-inner-form" v-if="!success">
                         <div class="details">
-                            Attach identity to<br><span style="font-size:12px">{{ address }}</span><br><br>
+                            Create or renew identity to<br><span style="font-size:12px">{{ address }}</span><br><br>
                             <form id="verificationForm" :action="'/auth/' + provider" method="GET">
                                 <div class="form-group">
                                     <select v-model="provider" class="input-text" placeholder="Select a provider..">
                                         <option value="">Select a provider</option>
                                         <option value="email">E-Mail</option>
                                         <option value="phone">Phone number</option>
+                                        <option value="linkedin">Linkedin</option>
                                         <option value="twitter">Twitter</option>
                                         <option value="github">Github</option>
                                         <option value="google">Google</option>
@@ -70,10 +71,16 @@
                                 <div class="form-group row">
                                     <div class="col-12">
                                         <div v-on:click="submitVerification()" class="btn-theme btn-theme-custom">Start verification</div><br>
-                                        <div v-on:click="checkIdentities()" class="btn-theme btn-theme-custom" style="background:blue!important">Check linked identities</div>
+                                        <br><hr><br>
+                                        Verify identities of<br><span style="font-size:12px">{{ address }}</span><br><br>
+                                        <div class="form-group">
+                                            <input type="password" v-model="unlockPwd" class="input-text text-center" placeholder="Insert wallet password">
+                                        </div>
+                                        <div v-on:click="showQR()" class="btn-theme btn-theme-custom" style="background:blue!important;">Verify</div>
+                                        <img v-if="showQRCanvas" :src="public_qrcode" width="100%">
                                         <div v-for="id in linked" v-bind:key="id.refID">
                                             <div v-on:click="revealID(id.refID)" style="border:1px solid #ccc; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
-                                                {{ id.refID }}
+                                                {{ id.refID }}: {{ id.identity.username }}
                                                 <br>
                                                 Written at block <strong>{{ id.block }}</strong><br>
                                                 {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}
@@ -101,9 +108,9 @@
                     <div v-if="updated">
                         <div class="login-inner-form text-center">
                             <h4>Process completed!</h4>
-                            Now is time to update your .sid file or sync again your app!<br>
-                            Please note, no one keeps your identity payload, only you can share it.<br><br>
-                            <canvas id="qr" style="margin-left:20px; width:100%; display:inline-block"></canvas>
+                            Now is time to download your updated .sid file and sync your app!<br>
+                            Please note, no one keeps your identity payload, only you can share it, these informations are not stored in any server.<br><br>
+                            <img :src="sync_qrcode" width="100%">
                             <a id="downloadsid" style="display:none"></a>
                             <div v-on:click="downloadSidFile()" class="btn-theme btn-theme-custom">Download .sid file</div><br>
                             <a href="/">Go back</a>

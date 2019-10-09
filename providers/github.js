@@ -39,11 +39,11 @@ passport.use(new GitHubStrategy({
         token: accessToken,
         created_at: Date.now()
     }
-    sign.signWithKey(process.env.PROVIDER_PRV, JSON.stringify(githubID)).then(signature => {
+    sign.signWithKey(process.env.GATEWAY_PRV, JSON.stringify(githubID)).then(signature => {
         req.session.github = {
             identity: githubID,
             fingerprint: signature.signature,
-            provider: signature.pubKey
+            gateway: signature.pubKey
         }
         return done(null, githubID)
     })

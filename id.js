@@ -43,6 +43,11 @@ if(providers.twitter !== undefined){
     app.use('/', twitter);
 }
 
+if(providers.linkedin !== undefined){
+    var linkedin = require('./providers/linkedin');
+    app.use('/', linkedin);
+}
+
 if(providers.phone !== undefined){
     var phone = require('./providers/phone');
     app.use('/', phone);
@@ -52,4 +57,4 @@ app.get('/auth/error', function (req, res) {
     res.json({message: 'Authentication failed', status: 401})
 })
 
-app.listen(port, () => console.log(`ScryptaID Engine listening on port ${port}!`))
+app.listen(port, () => console.log(`Scrypta identity framework listening on port ${port}!`))

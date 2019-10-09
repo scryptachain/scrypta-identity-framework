@@ -6,12 +6,15 @@ var app = new Vue({
       file: '',
       isWriting: false,
       unlockPwd: '',
+      showQRCanvas: false,
       provider: '',
       email: '',
       phone: '',
       workingmessage: '',
       success: '',
       encrypted_wallet: '',
+      public_qrcode: '',
+      sync_qrcode: '',
       decrypted_wallet: '',
       linked: '',
       updated: '',
@@ -54,7 +57,7 @@ var app = new Vue({
           app.axios.post(idanode + '/read', {
             protocol: 'I://',
             address: app.address
-          }).then(result => {
+          }).then(async result => {
             var identities = {}
             for(let k in result.data.data){
               let id = result.data.data[k]
@@ -62,12 +65,57 @@ var app = new Vue({
                 identities[id.refID] = id
               }
             }
-            app.linked = identities
+            app.linked = []
+            for(let k in app.decrypted_wallet.identity){
+              let id = app.decrypted_wallet.identity[k]
+              //PRIVATE VERIFICATION
+              let signed = await app.scrypta.signMessage(app.decrypted_wallet.prv, JSON.stringify(id))
+              for(let y in identities){
+                let idB = identities[y]
+                if(idB.data.signature === signed.signature){
+                  //PUBLIC VERIFICATION
+                  let verify = await app.scrypta.verifyMessage(app.decrypted_wallet.key, idB.data.signature, JSON.stringify(id))
+                  if(verify !== false && verify.address === app.address){
+                    idB.identity = id.identity
+                    app.linked.push(idB)
+                  }
+                }
+              }
+            }
           })
+        },
+        showQR(){
+          const app = this
+          if(app.unlockPwd !== ''){
+            app.scrypta.readKey(app.unlockPwd).then(sid => {
+              if(sid !== false){
+                app.decrypted_wallet = sid
+                this.showQRCanvas = true
+                let QR = {
+                  address: app.address,
+                  pubkey: sid.key,
+                  identity: sid.identity
+                }
+                setTimeout(function(){
+                  var qr = new QRious({
+                    element: document.getElementById('qrcode'),
+                    value: JSON.stringify(QR)
+                  });
+                  qr.level = 'L';
+                  qr.size = 500;
+                  app.public_qrcode = qr.toDataURL()
+                },30)
+                app.checkIdentities()
+              }else{
+                alert('Wrong password!')
+              }
+            })
+          }
         },
         revealID(method){
           const app = this
           console.log(app.linked[method])
+          //TODO
         },
         submitVerification(){
             document.getElementById("verificationForm").submit();
@@ -124,7 +172,11 @@ var app = new Vue({
                 app.isWriting = true
                 let private_key = sid.prv
                 app.workingmessage = 'Signing identity with private key...'
-                app.scrypta.signMessage(private_key, JSON.stringify(app.payload)).then(async signed => {
+                var toStore = {
+                  identity: app.payload.identity,
+                  fingerprint: app.payload.fingerprint
+                }
+                app.scrypta.signMessage(private_key, JSON.stringify(toStore)).then(async signed => {
                   if(sid.identity === undefined){
                     sid.identity = {}
                   }
@@ -132,13 +184,13 @@ var app = new Vue({
                     sid.identity[app.success] = {}
                   }
 
-                  sid.identity[app.success] = app.payload
+                  sid.identity[app.success] = toStore
                   let updated = await app.scrypta.buildWallet(app.unlockPwd, app.address, sid, true)
                   app.encrypted_wallet = updated
 
                   let message = {
                     signature: signed.signature,
-                    provider: app.payload.provider,
+                    gateway: app.payload.gateway,
                     fingerprint: app.payload.fingerprint
                   }
 
@@ -152,12 +204,12 @@ var app = new Vue({
                       app.updated = app.encrypted_wallet
                       setTimeout(function(){
                         var qr = new QRious({
-                          element: document.getElementById('qr'),
-                          value: app.updated
+                          element: document.getElementById('qrcode'),
+                          value: JSON.stringify(sid.identity)
                         });
-                        qr.level = 'H';
-                        qr.padding = 0;
-                        qr.size = 1000;
+                        qr.level = 'L';
+                        qr.size = 500;
+                        app.sync_qrcode = qr.toDataURL()
                       },30)
                     }else{
                       alert('There\'s an error in the upload, please retry!')

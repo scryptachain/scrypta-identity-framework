@@ -37,11 +37,11 @@ passport.use(new GoogleStrategy({
         token: accessToken,
         created_at: Date.now()
     }
-    sign.signWithKey(process.env.PROVIDER_PRV, JSON.stringify(googleID)).then(signature => {
+    sign.signWithKey(process.env.GATEWAY_PRV, JSON.stringify(googleID)).then(signature => {
         req.session.google = {
             identity: googleID,
             fingerprint: signature.signature,
-            provider: signature.pubKey
+            gateway: signature.pubKey
         }
         return done(null, googleID)
     })
