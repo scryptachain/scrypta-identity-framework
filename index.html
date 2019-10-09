@@ -28,7 +28,7 @@
             <div class="row">
                 <div class="col-12 text-align:center col-pad-0 bg-img none-992" v-if="!address">
                     <div class="logo">
-                        <a href="#">
+                        <a href="/">
                             <img src="assets/logo.png" alt="logo">
                         </a>
                     </div>
@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-pad-0 bg-color-7" v-if="address">
                     <div class="logo" style="position:fixed; top:20px; left:20px;">
-                        <a href="#"></a>
+                        <a href="/"></a>
                             <img src="assets/logo_dark.png" alt="logo">
                         </a>
                     </div>
@@ -53,12 +53,7 @@
                                 <div class="form-group">
                                     <select v-model="provider" class="input-text" placeholder="Select a provider..">
                                         <option value="">Select a provider</option>
-                                        <option value="email">E-Mail</option>
-                                        <option value="phone">Phone number</option>
-                                        <option value="linkedin">Linkedin</option>
-                                        <option value="twitter">Twitter</option>
-                                        <option value="github">Github</option>
-                                        <option value="google">Google</option>
+                                        <option v-for="provider in providers" :value="provider">{{ provider.toUpperCase() }}</option>
                                     </select>
                                 </div>
                                 <div class="form-group" v-if="provider === 'email'">
@@ -80,7 +75,8 @@
                                         <img v-if="showQRCanvas" :src="public_qrcode" width="100%">
                                         <div v-for="id in linked" v-bind:key="id.refID">
                                             <div v-on:click="revealID(id.refID)" style="border:1px solid #ccc; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
-                                                {{ id.refID }}: {{ id.identity.username }}
+                                                {{ id.refID }}: {{ id.identity.username }}<br>
+                                                ID: {{ id.identity.id }}
                                                 <br>
                                                 Written at block <strong>{{ id.block }}</strong><br>
                                                 {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}

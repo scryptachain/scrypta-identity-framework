@@ -12,6 +12,7 @@ var session = require('express-session')
 app.set('trust proxy', 1)
 const providers = require('./providers')
 const fs = require('fs')
+var availables = []
 
 app.use(session({
     secret: process.env.SESSION_SECRET,  
@@ -31,30 +32,39 @@ app.get('/',
 if(providers.github !== undefined){
     var github = require('./providers/github');
     app.use('/', github);
+    availables.push('github')
 }
 
 if(providers.google !== undefined){
     var google = require('./providers/google');
     app.use('/', google);
+    availables.push('google')
 }
 
 if(providers.twitter !== undefined){
     var twitter = require('./providers/twitter');
     app.use('/', twitter);
+    availables.push('twitter')
 }
 
 if(providers.linkedin !== undefined){
     var linkedin = require('./providers/linkedin');
     app.use('/', linkedin);
+    availables.push('linkedin')
 }
 
 if(providers.phone !== undefined){
     var phone = require('./providers/phone');
     app.use('/', phone);
+    availables.push('phone')
 }
 
 app.get('/auth/error', function (req, res) {
     res.json({message: 'Authentication failed', status: 401})
+})
+
+app.get('/providers', function (req, res) {
+    res.json({providers: availables, status: 200})
 })
 
 app.listen(port, () => console.log(`Scrypta identity framework listening on port ${port}!`))

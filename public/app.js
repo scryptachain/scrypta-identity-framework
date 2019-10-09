@@ -9,6 +9,7 @@ var app = new Vue({
       showQRCanvas: false,
       provider: '',
       email: '',
+      providers: [],
       phone: '',
       workingmessage: '',
       success: '',
@@ -29,7 +30,10 @@ var app = new Vue({
     async mounted (){
       let url = document.URL
       const app = this
-    
+      let providersRequest = await app.axios.get('/providers');
+      let providers = providersRequest.data.providers
+      app.providers = providers
+      
       let check = await this.checkUser()
       if(check === true){
         if(url.indexOf('?') !== -1){

@@ -2,7 +2,7 @@
   "name": "scrypta-identity-framework",
   "version": "1.0.0",
   "description": "ScryptaID framework",
-  "main": "idframework.js",
+  "main": "id.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node id.js",
