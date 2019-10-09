@@ -1,12 +1,12 @@
 {
-  "name": "scrypta-id-engine",
+  "name": "scrypta-identity-framework",
   "version": "1.0.0",
-  "description": "ScryptaID engine powered by PassportJS",
-  "main": "idengine.js",
+  "description": "ScryptaID framework",
+  "main": "idframework.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node idengine.js",
-    "dev": "nodemon idengine.js"
+    "start": "node id.js",
+    "dev": "nodemon id.js"
   },
   "author": "Scrypta Task Force",
   "license": "MIT",
