@@ -26,17 +26,20 @@
     <div class="login-7 tab-box">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-12 text-align:center col-pad-0 bg-img none-992" v-if="!address">
+                <div class="col-12 text-align:center col-pad-0 bg-img" v-if="!address">
                     <div class="logo">
                         <a href="/">
                             <img src="assets/logo.png" alt="logo">
                         </a>
                     </div>
-                    <div class="informeson text-center">
-                        <h4 style="margin-bottom:0">ScryptaID Authenticator</h4>
-                        <p>
-                            With this service you'll be able to link one or more third party accounts to your Lyra address.<br>
-                            The identity payload will be encrypted with the same password of your address and you will save the updated version on your phone or on your PC downloading again the .sid file.<br><br>
+                    <div class="informeson text-center" style="font-family: 'Work Sans'!important">
+                        <h1 style="margin-bottom:0;">Scrypta Sum</h1>
+                        <p style="font-weight: normal;">
+                            With this service you'll be able to link one or more third party identities to your Lyra address.<br>
+                            The identity payload will be encrypted with the same password of your address.<br>
+                            You must save the updated version on your phone or on your PC downloading again the .sid file.<br>
+                            <span style="color:#f00">No one can access your identity payloads, so save them in a safe place.</span><br>
+                            To start select a .sid file from your system or enter using the ScryptaID extension.<br>
                             <input type="file"
                                 style="display:inline-block; overflow:hidden"
                                 placeholder="Just drag and drop here or select a .sid file"
@@ -53,9 +56,12 @@
                             <img src="assets/logo_dark.png" alt="logo">
                         </a>
                     </div>
+                    <div style="position:fixed; top:20px; width:30px; right:35px; font-size:18px; cursor:pointer;" onClick="ScryptaCore.forgetKey(); location.reload()">
+                        EXIT
+                    </div>
                     <div class="login-inner-form" v-if="!success">
                         <div class="details">
-                            Create or renew identity to<br><span style="font-size:12px">{{ address }}</span><br><br>
+                            Create or renew identity for<br><span style="font-size:12px">{{ address }}</span><br><br>
                             <form id="verificationForm" :action="'/auth/' + provider" method="GET">
                                 <div class="form-group">
                                     <select v-model="provider" class="input-text" placeholder="Select a provider..">
@@ -63,7 +69,7 @@
                                         <option v-for="provider in providers" :value="provider">{{ provider.toUpperCase() }}</option>
                                     </select>
                                 </div>
-                                <div class="form-group" v-if="provider === 'email'">
+                                <div class="form-group" v-if="provider === 'email' && showEmailVerification === false">
                                     <input type="email" v-model="email" class="input-text" placeholder="Insert E-Mail">
                                 </div>
                                 <div class="form-group" v-if="provider === 'phone' && showSmsVerification === false">
@@ -73,23 +79,34 @@
                                 <div class="form-group" v-if="provider === 'phone' && showSmsVerification === true">
                                     <input type="text" v-model="smsverification" class="input-text" placeholder="Insert code received by SMS">
                                 </div>
+                                <div class="form-group" v-if="provider === 'email' && showEmailVerification === true">
+                                    <input type="text" v-model="emailverification" class="input-text" placeholder="Insert code received by e-mail">
+                                </div>
                                 <div class="form-group row">
                                     <div class="col-12">
                                         <div v-if="provider !== 'phone' && provider !== 'email'" v-on:click="submitVerification()" class="btn-theme btn-theme-custom">Start verification</div>
                                         <div v-if="provider === 'phone' && showSmsVerification === false" v-on:click="sendSMS()" class="btn-theme btn-theme-custom">Send verification SMS</div>
                                         <div v-if="provider === 'phone' && showSmsVerification === true" v-on:click="verifySMS()" class="btn-theme btn-theme-custom">Verify SMS</div>
+                                        <div v-if="provider === 'email' && showEmailVerification === false" v-on:click="sendEmail()" class="btn-theme btn-theme-custom">Send verification e-mail</div>
+                                        <div v-if="provider === 'email' && showEmailVerification === true" v-on:click="verifyEMail()" class="btn-theme btn-theme-custom">Verify e-mail</div>
                                         <br><hr><br>
-                                        Verify identities of<br><span style="font-size:12px">{{ address }}</span><br><br>
-                                        <div class="form-group">
+                                        Show linked identities for<br><span style="font-size:12px">{{ address }}</span><br><br>
+                                        <div v-if="!showQRCanvas" class="form-group">
                                             <input type="password" v-model="unlockPwd" class="input-text text-center" placeholder="Insert wallet password">
                                         </div>
-                                        <div v-on:click="showQR()" class="btn-theme btn-theme-custom" style="background:blue!important;">Verify</div>
+                                        <div v-if="!showQRCanvas" v-on:click="showQR()" class="btn-theme btn-theme-custom" style="background:blue!important;">Search on the Blockchain</div>
+                                        <div v-if="showQRCanvas">
+                                            This is your Scrypta PIP (Public Identity Payload).<br>
+                                            <strong>Share it only if you want to share your identity.</strong><br><br>
+                                            Each entry will be checked with the blockchain and merged with your local informations.<br>
+                                            If something can't be matched with blockchain signatures it will not shown and it will not considered valid.
+                                        </div>
                                         <img v-if="showQRCanvas" :src="public_qrcode" width="100%">
-                                        <div v-if="showQRCanvas" v-on:click="downloadSidFile()" class="btn-theme btn-theme-custom">Download .sid file</div><br>
+                                        <div v-if="showQRCanvas" v-on:click="downloadSidFile()" class="btn-theme btn-theme-custom">Download .sid file</div>
                                         <a id="downloadsid" style="display:none"></a>
                                         <div v-for="id in linked" v-bind:key="id.refID">
                                             <div v-on:click="revealID(id.refID)" style="border:1px solid #ccc; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
-                                                {{ id.refID }}: {{ id.identity.username }}<br>
+                                                <strong>{{ id.refID }}</strong><br>{{ id.identity.username }}<br>
                                                 <span v-if="id.identity.id !== undefined">ID: {{ id.identity.id }}<br></span>
                                                 Written at block <strong>{{ id.block }}</strong><br>
                                                 {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}

@@ -61,6 +61,12 @@ if(providers.phone !== undefined){
     availables.push('phone')
 }
 
+if(providers.email !== undefined){
+    var email = require('./providers/email');
+    app.use('/', email);
+    availables.push('email')
+}
+
 app.get('/auth/error', function (req, res) {
     res.json({message: 'Authentication failed', status: 401})
 })

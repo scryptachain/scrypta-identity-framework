@@ -6,7 +6,9 @@ var app = new Vue({
       file: '',
       isWriting: false,
       showSmsVerification: false,
+      showEmailVerification: false,
       smsverification: '',
+      emailverification: '',
       unlockPwd: '',
       showQRCanvas: false,
       provider: '',
@@ -123,10 +125,36 @@ var app = new Vue({
           console.log(app.linked[method])
           //TODO
         },
+        sendEmail(){
+          const app = this
+          if(app.email !== ''){
+            app.axios.post('/email/send', {email: app.email}).then(response => {
+              if(response.data.success === true){
+                app.showEmailVerification = true
+              }
+            })
+          }else{
+            alert('Write email first!')
+          }
+        },
+        verifyEMail(){
+          const app = this
+          if(app.emailverification !== undefined){
+            app.axios.post('/email/verify', {email: app.email, code: app.emailverification}).then(result => {
+              if(result.data.status === 200){
+                app.success = 'email'
+                app.payload = result.data.success
+              }else{
+                alert('Code is invalid!')
+              }
+            })
+          }else{
+            alert('Write code first!')
+          }
+        },
         sendSMS(){
           const app = this
           if(app.phone !== ''){
-            app.showSmsVerification = true
             app.axios.post('/phone/send', {number: app.phone}).then(response => {
               if(response.data.success === true){
                 app.showSmsVerification = true
@@ -152,7 +180,10 @@ var app = new Vue({
           }
         },
         submitVerification(){
+          const app = this
+          if(app.provider !== ''){
             document.getElementById("verificationForm").submit();
+          }
         },
         loadWalletFromFile(ev) {
           const file = ev.target.files[0];

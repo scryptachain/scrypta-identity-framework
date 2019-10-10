@@ -30,7 +30,7 @@ router.post('/phone/send',
                         _id: req.fields.number
                     }
                     db.get(req.fields.number).catch(function (err) {
-                        db.put(toStore);
+                        db.put(toStore)
                     }).then(function (stored) {
                         if(stored !== undefined){
                             db.remove(stored)
