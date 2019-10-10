@@ -36,7 +36,14 @@
                         <h4 style="margin-bottom:0">ScryptaID Authenticator</h4>
                         <p>
                             With this service you'll be able to link one or more third party accounts to your Lyra address.<br>
-                            The identity payload will be encrypted with the same password of your address and you will save the updated version on your phone or on your PC downloading again the .sid file.
+                            The identity payload will be encrypted with the same password of your address and you will save the updated version on your phone or on your PC downloading again the .sid file.<br><br>
+                            <input type="file"
+                                style="display:inline-block; overflow:hidden"
+                                placeholder="Just drag and drop here or select a .sid file"
+                                drop-placeholder="Drop file here..."
+                                v-on:change="loadWalletFromFile"
+                                class="text-left mb-3 mt-3"
+                            />
                         </p>
                     </div>
                 </div>
@@ -59,13 +66,18 @@
                                 <div class="form-group" v-if="provider === 'email'">
                                     <input type="email" v-model="email" class="input-text" placeholder="Insert E-Mail">
                                 </div>
-                                <div class="form-group" v-if="provider === 'phone'">
+                                <div class="form-group" v-if="provider === 'phone' && showSmsVerification === false">
                                     <input type="text" v-model="phone" class="input-text" placeholder="Insert Phone number">
                                     <br><small>Insert the country prefix before (ex +393331122333)</small>
                                 </div>
+                                <div class="form-group" v-if="provider === 'phone' && showSmsVerification === true">
+                                    <input type="text" v-model="smsverification" class="input-text" placeholder="Insert code received by SMS">
+                                </div>
                                 <div class="form-group row">
                                     <div class="col-12">
-                                        <div v-on:click="submitVerification()" class="btn-theme btn-theme-custom">Start verification</div><br>
+                                        <div v-if="provider !== 'phone' && provider !== 'email'" v-on:click="submitVerification()" class="btn-theme btn-theme-custom">Start verification</div>
+                                        <div v-if="provider === 'phone' && showSmsVerification === false" v-on:click="sendSMS()" class="btn-theme btn-theme-custom">Send verification SMS</div>
+                                        <div v-if="provider === 'phone' && showSmsVerification === true" v-on:click="verifySMS()" class="btn-theme btn-theme-custom">Verify SMS</div>
                                         <br><hr><br>
                                         Verify identities of<br><span style="font-size:12px">{{ address }}</span><br><br>
                                         <div class="form-group">
@@ -73,11 +85,12 @@
                                         </div>
                                         <div v-on:click="showQR()" class="btn-theme btn-theme-custom" style="background:blue!important;">Verify</div>
                                         <img v-if="showQRCanvas" :src="public_qrcode" width="100%">
+                                        <div v-if="showQRCanvas" v-on:click="downloadSidFile()" class="btn-theme btn-theme-custom">Download .sid file</div><br>
+                                        <a id="downloadsid" style="display:none"></a>
                                         <div v-for="id in linked" v-bind:key="id.refID">
                                             <div v-on:click="revealID(id.refID)" style="border:1px solid #ccc; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
                                                 {{ id.refID }}: {{ id.identity.username }}<br>
-                                                ID: {{ id.identity.id }}
-                                                <br>
+                                                <span v-if="id.identity.id !== undefined">ID: {{ id.identity.id }}<br></span>
                                                 Written at block <strong>{{ id.block }}</strong><br>
                                                 {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}
                                             </div>
@@ -91,7 +104,9 @@
                         <div class="login-inner-form" v-if="success">
                             Your {{ success.toUpperCase() }} account:<hr>
                             Username: {{ payload.identity.username }}<br>
-                            ID: {{ payload.identity.id }}<br><br>
+                            <span v-if="payload.identity.id !== undefined">
+                                ID: {{ payload.identity.id }}<br><br>
+                            </span>
                             <div class="form-group">
                                 <input type="password" v-model="unlockPwd" class="input-text text-center" placeholder="Insert wallet password">
                             </div>
@@ -112,22 +127,6 @@
                             <a href="/">Go back</a>
                         </div>
                     </div>
-                </div>
-                <div class="col-xl-5 col-lg-5 col-md-12 col-pad-0 bg-color-7" v-if="!address">
-                        <div class="login-inner-form">
-                            <div class="details">
-                                <div style="width:100%; display:block; overflow:hidden">
-                                    Login with an existent ScryptaID.
-                                </div>
-                                <input type="file"
-                                    style="width:100%; display:block; overflow:hidden"
-                                    placeholder="Just drag and drop here or select a .sid file"
-                                    drop-placeholder="Drop file here..."
-                                    v-on:change="loadWalletFromFile"
-                                    class="text-left mb-3 mt-3"
-                                />
-                            </div>
-                        </div>
                 </div>
             </div>
         </div>

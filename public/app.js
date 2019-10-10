@@ -5,6 +5,8 @@ var app = new Vue({
       address: '',
       file: '',
       isWriting: false,
+      showSmsVerification: false,
+      smsverification: '',
       unlockPwd: '',
       showQRCanvas: false,
       provider: '',
@@ -121,6 +123,34 @@ var app = new Vue({
           console.log(app.linked[method])
           //TODO
         },
+        sendSMS(){
+          const app = this
+          if(app.phone !== ''){
+            app.showSmsVerification = true
+            app.axios.post('/phone/send', {number: app.phone}).then(response => {
+              if(response.data.success === true){
+                app.showSmsVerification = true
+              }
+            })
+          }else{
+            alert('Write phone first!')
+          }
+        },
+        verifySMS(){
+          const app = this
+          if(app.smsverification !== undefined){
+            app.axios.post('/phone/verify', {number: app.phone, code: app.smsverification}).then(result => {
+              if(result.data.status === 200){
+                app.success = 'phone'
+                app.payload = result.data.success
+              }else{
+                alert('Code is invalid!')
+              }
+            })
+          }else{
+            alert('Write code first!')
+          }
+        },
         submitVerification(){
             document.getElementById("verificationForm").submit();
         },
@@ -184,46 +214,51 @@ var app = new Vue({
                   if(sid.identity === undefined){
                     sid.identity = {}
                   }
-                  if(sid.identity[app.success] === undefined){
-                    sid.identity[app.success] = {}
-                  }
-
+                  sid.identity[app.success] = {}
                   sid.identity[app.success] = toStore
-                  let updated = await app.scrypta.buildWallet(app.unlockPwd, app.address, sid, true)
-                  app.encrypted_wallet = updated
+                  if(sid.identity[app.success] === toStore){
+                      let updated = await app.scrypta.buildWallet(app.unlockPwd, app.address, sid, true)
+                      let confirm = await app.scrypta.readKey(app.unlockPwd)
+                      if(confirm.identity[app.success].fingerprint === toStore.fingerprint){
+                        app.encrypted_wallet = updated
+                        let message = {
+                          signature: signed.signature,
+                          gateway: app.payload.gateway,
+                          fingerprint: app.payload.fingerprint
+                        }
 
-                  let message = {
-                    signature: signed.signature,
-                    gateway: app.payload.gateway,
-                    fingerprint: app.payload.fingerprint
-                  }
-
-                  app.workingmessage = 'Uploading data to the blockchain...'
-                  app.scrypta.write(app.unlockPwd, JSON.stringify(message), '', app.success.toUpperCase() , 'I://', app.encrypted_wallet).then(res => {
-                    if(res.uuid !== undefined){
-                      app.isWriting = false
-                      app.workingmessage = 'Data written correctly.'
-                      app.payload = ''
-                      app.decrypted_wallet = 'WALLET LOCKED'
-                      app.updated = app.encrypted_wallet
-                      setTimeout(function(){
-                        var qr = new QRious({
-                          element: document.getElementById('qrcode'),
-                          value: JSON.stringify(sid.identity)
-                        });
-                        qr.level = 'L';
-                        qr.size = 500;
-                        app.sync_qrcode = qr.toDataURL()
-                      },30)
+                        app.workingmessage = 'Uploading data to the blockchain...'
+                        app.scrypta.write(app.unlockPwd, JSON.stringify(message), '', app.success.toUpperCase() , 'I://', app.encrypted_wallet).then(res => {
+                          if(res.uuid !== undefined){
+                            app.isWriting = false
+                            app.workingmessage = 'Data written correctly.'
+                            app.payload = ''
+                            app.decrypted_wallet = 'WALLET LOCKED'
+                            app.updated = app.encrypted_wallet
+                            setTimeout(function(){
+                              var qr = new QRious({
+                                element: document.getElementById('qrcode'),
+                                value: JSON.stringify(sid.identity)
+                              });
+                              qr.level = 'L';
+                              qr.size = 500;
+                              app.sync_qrcode = qr.toDataURL()
+                            },30)
+                          }else{
+                            alert('There\'s an error in the upload, please retry!')
+                            app.isWriting = false
+                          }
+                        }).catch(() => {
+                          alert('There\'s an error in the upload, please retry!')
+                          app.isWriting = false
+                        })
+                      }else{
+                        alert('Something goes wrong, retry please!')
+                      }
                     }else{
-                      alert('There\'s an error in the upload, please retry!')
-                      app.isWriting = false
+                      alert('Something goes wrong, retry please!')
                     }
-                  }).catch(() => {
-                    alert('There\'s an error in the upload, please retry!')
-                    app.isWriting = false
                   })
-                })
               }else{
                 alert('Wrong password!')
               }

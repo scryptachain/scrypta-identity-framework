@@ -2,6 +2,7 @@ const express = require('express')
 const passport = require('passport')
 require('dotenv').config()
 var app = express()
+const formidableMiddleware = require('express-formidable')
 app.use(require('serve-static')(__dirname + '/public'))
 app.use(require('cookie-parser')())
 app.use(require('body-parser').urlencoded({ extended: true }))
@@ -20,6 +21,7 @@ app.use(session({
     saveUninitialized: true
 }))
 app.use(express.static('public'))
+app.use(formidableMiddleware());
 
 app.get('/', 
     function(req, res){
