@@ -96,10 +96,10 @@
                                         </div>
                                         <div v-if="!showQRCanvas" v-on:click="showQR()" class="btn-theme btn-theme-custom" style="background:blue!important;">Search on the Blockchain</div>
                                         <div v-if="showQRCanvas">
-                                            This is your Scrypta PIP (Public Identity Payload).<br>
-                                            <strong>Share it only if you want to share your identity.</strong><br><br>
-                                            Each entry will be checked with the blockchain and merged with your local informations.<br>
-                                            If something can't be matched with blockchain signatures it will not shown and it will not considered valid.
+                                            This is your sharable identity payload.<br>
+                                            <strong>Share it only with trusted parties.</strong><br><br>
+                                            Each entry will be checked with the blockchain and merged with your .sid file.<br>
+                                            If one or more entry can't be matched with blockchain signatures it will not shown and it will not considered valid.<br><br>
                                         </div>
                                         <img v-if="showQRCanvas" :src="public_qrcode" width="100%">
                                         <div v-if="showQRCanvas" v-on:click="downloadSidFile()" class="btn-theme btn-theme-custom">Download .sid file</div>
