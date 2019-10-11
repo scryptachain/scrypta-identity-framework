@@ -24,8 +24,8 @@ router.post('/email/send',
             var data = {
                 from: providers.email.name +' <'+providers.email.email+'>',
                 to: req.fields.email,
-                subject: 'Verify your e-mail with Scrypta Sum',
-                text: 'Please insert this code: ' + code
+                subject: 'Verify your e-mail with ScryptaID',
+                text: 'Please insert this verification code: ' + code
             };
             
             mailgun.messages().send(data, function (error, body) {

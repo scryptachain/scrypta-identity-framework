@@ -21,7 +21,7 @@ router.post('/phone/send',
             client.messages.create({
                 to: req.fields.number,
                 from: providers.phone.name,
-                body: 'Please insert this verification code in Scrypta Sum dApp: ' + code
+                body: 'Please insert this verification code: ' + code
             }, function(error, message) {
                 if (!error) {
                     let toStore = {
