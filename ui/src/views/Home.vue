@@ -141,7 +141,7 @@ export default {
       const app = this
       let normalized = window.location.href
       let dot = normalized.split('?')
-      app.backendURL = dot[0].replace(':8080/',':3000/').replace('/#/','').replace(':3000/',':3000')
+      app.backendURL = dot[0].replace(':8080/',':3000/').replace('/#/','').replace(':3000/',':3000').replace('.id/','.id')
       let providersRequest = await app.axios.get(app.backendURL + '/providers');
       let providers = providersRequest.data.providers
       app.providers = providers

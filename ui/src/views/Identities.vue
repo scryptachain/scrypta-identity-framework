@@ -3,7 +3,7 @@
     <div class="login-7 tab-box">
       <h1>Your Digital Identity</h1>
       <div v-if="isLoading"><br>Loading informations from the blockchain...</div>
-      <div v-if="!isLoading && Object.keys(identities).length === 0">Nothing to show, start creating your first digital identity.</div>
+      <div v-if="!isLoading && Object.keys(identities).length === 0"><br>Nothing to show, start creating your first digital identity.</div>
       <div v-if="linked.length > 0">
         <div v-if="!showQRCanvas">
           <br>These are your <b>private</b> informations, share it only with trusted parties:
