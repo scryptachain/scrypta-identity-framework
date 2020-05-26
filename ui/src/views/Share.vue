@@ -20,6 +20,9 @@
             </div>
           </a>
       </div>
+      <br><br>
+      <a id="downloadid" style="display:none"></a>
+      <b-button size="is-large" v-on:click="storeCredentials" type="is-primary">STORE CREDENTIALS</b-button>
     </div>
   </div>
 </template>
@@ -106,6 +109,32 @@ export default {
                   app.linked.push(idB)
                 }
               }
+            }
+          })
+        },
+        storeCredentials(){
+          const app = this
+          app.$buefy.dialog.prompt({
+            message: `Enter a strong password to encrypt the file`,
+            inputAttrs: {
+              type: "password"
+            },
+            trapFocus: true,
+            onConfirm: async password => {
+              let encrypted = await app.scrypta.cryptData(app.$route.params.identity, password)
+              var a = document.getElementById("downloadid");
+              var file = new Blob(
+                [encrypted],
+                { type: "eid" }
+              );
+              a.href = URL.createObjectURL(file);
+              a.download = app.address + ".eid";
+              var clickEvent = new MouseEvent("click", {
+                view: window,
+                bubbles: true,
+                cancelable: false
+              });
+              a.dispatchEvent(clickEvent);
             }
           })
         }

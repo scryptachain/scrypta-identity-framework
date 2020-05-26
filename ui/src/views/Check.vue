@@ -1,8 +1,23 @@
 <template>
   <div class="home">
     <div class="login-7 tab-box">
-      <div v-if="!address">
+      <div v-if="!address && showQR" style="position:fixed; top: 0; background:#000; left: 0; width:100%; height:100%; z-index: 999999999;">
+        <b-button size="is-small" type="is-primary" v-on:click="closeScan" style="position:absolute; top: 20px; right: 20px; z-index: 999;">X</b-button>
         <qrcode-stream @decode="onDecode"></qrcode-stream>
+      </div>
+      <div v-if="!address">
+        <h1>Check and identity</h1><br>
+        <p>Use this function to scan an identity and verify if it's valid and matches the blockchain signature.</p><br><br>
+        <b-button v-on:click="openScan" type="is-primary">SCAN QR CODE</b-button><br><hr><br>
+        <b-field>
+            <b-upload v-model="file" v-on:input="loadWalletFromFile" drag-drop>
+              <section class="section">
+                <div class="content has-text-centered">
+                  <p>Drag and drop your .eid here or click to upload</p>
+                </div>
+              </section>
+            </b-upload>
+        </b-field>
       </div>
       <div v-if="address">
         <h1>Digital identities of<div style="font-size:14px;">{{ address }}</div></h1>
@@ -41,6 +56,7 @@ export default {
         scrypta: new ScryptaCore(true),
         backendURL: '',
         address: '',
+        showQR: false,
         file: '',
         isWriting: false,
         showSmsVerification: false,
@@ -109,6 +125,73 @@ export default {
               }
             }
           })
+        },
+        openScan(){
+          this.showQR = true
+        },
+        closeScan(){
+          this.showQR = false
+        },
+        loadWalletFromFile() {
+          const app = this;
+          const file = app.file;
+          const reader = new FileReader();
+          reader.onload = function() {
+            var dataKey = reader.result;
+
+            app.$buefy.dialog.prompt({
+              message: `Enter archive password`,
+              inputAttrs: {
+                type: "password"
+              },
+              trapFocus: true,
+              onConfirm: async password => {
+                let key = await app.scrypta.decryptData(dataKey, password)
+                if (key !== false) {
+                  let compressed = key
+                  while(compressed.indexOf('*') !== -1){
+                    compressed = compressed.replace('*','/')
+                  }
+                  let identity = JSON.parse(zlib.inflateSync(new Buffer(compressed, 'base64')).toString())
+                  app.address = identity.address
+                  let transactions = await app.scrypta.get('/transactions/' + app.address)
+                  let last = transactions.data.length - 1
+                  app.first_tx = transactions.data[last]
+                  app.scrypta.post('/read', {
+                    protocol: 'I://',
+                    address: app.address
+                  }).then(async result => {
+                    var identities = {}
+                    for(let k in result.data){
+                      let id = result.data[k]
+                      if(identities[id.refID] === undefined){
+                        identities[id.refID] = id
+                      }
+                    }
+                    app.linked = []
+                    for(let k in identity){
+                      let id = identity[k]
+                      for(let y in identities){
+                        let idB = identities[y]
+                        //PUBLIC VERIFICATION
+                        let verify = await app.scrypta.verifyMessage(identity.key, idB.data.signature, JSON.stringify(id))
+                        if(verify !== false && verify.address === identity.address){
+                          idB.identity = id.identity
+                          app.linked.push(idB)
+                        }
+                      }
+                    }
+                  })
+                } else {
+                  app.$buefy.toast.open({
+                    message: "Wrong password!",
+                    type: "is-danger"
+                  });
+                }
+              }
+            });
+          };
+          reader.readAsText(file);
         }
     }
 }

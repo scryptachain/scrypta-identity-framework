@@ -253,7 +253,7 @@ export default {
   #nav a.router-link-exact-active {
     color: #42b983;
   }
-  @media screen and (max-width: 768px){
+  @media screen and (max-width: 1024px){
     .login-btn{
       width: 100%!important;
     }
