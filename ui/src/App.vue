@@ -253,5 +253,8 @@ export default {
     .login-btn{
       width: 100%!important;
     }
+    .card-footer-item{
+      font-size:12px!important;
+    }
   }
 </style>
