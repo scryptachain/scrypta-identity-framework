@@ -6,7 +6,7 @@
       </div>
       <div v-if="address">
         <h1>Digital identities of<div style="font-size:14px;">{{ address }}</div></h1>
-        <br><p>These informations are strictly confidentials, please don't share the link with third parties.</p>
+        <br><br><p>These informations are strictly confidentials, please don't share them with third parties.</p>
         <div style="border:1px solid #ccc; text-align:left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
             <v-gravatar :email="address" style="float:left; height:55px; margin-right:10px;" />
             <strong>LYRA ADDRESS</strong><br>
