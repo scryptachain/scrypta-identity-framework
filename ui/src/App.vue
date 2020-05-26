@@ -39,10 +39,14 @@
           <div class="container" id="create" style="margin-top:50px;">
             <div class="card">
               <div style="padding: 50px 20px;">
-                <h1 class="title is-1">Start Now</h1>
+                <img src="/logo.png"><br>
+                <h1 class="title is-1">Scrypta Digital Identity Framework</h1><br><br>
+                <p>
+                  Scrypta Ditgital Identity Framework is an SSI (Self Sovereign Identity) service which enable you to safely store and share your digital identity with third parties.<br>This service will never store your personal informations so please download your authenticated .sid files and store them safely.
+                </p>
                 <br />
                 <h2 class="subtitle">
-                  <br />You need a Scrypta Identity to enter the platform.
+                  <br />You need a basic Scrypta Identity to enter the platform.<br>You can enter with an existing .sid file or create a new one.
                   <br />
                   <br />Use <a href="https://id.scryptachain.org/" target="_blank">Scrypta ID Extension</a> or <a v-on:click="showCreate">create a new wallet</a>.
                   <br />
