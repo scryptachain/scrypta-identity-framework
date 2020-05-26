@@ -64,7 +64,7 @@
                             <span v-if="payload.identity.id !== undefined">
                               <b>ID:</b> {{ payload.identity.id }}<br><br>
                             </span><br>
-                            <b-button v-on:click="writeIdentity()" v-if="!isWriting" type="is-primary">Write identity's signature into the Blockchain</b-button>
+                            <b-button v-on:click="writeIdentity()" v-if="!isWriting" type="is-primary">Write signature</b-button>
                             <div v-if="isWriting">
                                 {{ workingmessage }}
                             </div>
