@@ -25,9 +25,9 @@
 </template>
 
 <script>
-const msgpack = require('msgpack5')(), encode  = msgpack.encode, decode = msgpack.decode
 const ScryptaCore = require('@scrypta/core')
 const axios = require('axios')
+var zlib = require('zlib')
 
 export default {
   name: 'Home',
@@ -74,7 +74,11 @@ export default {
     methods: {
         async checkIdentity(){
           const app = this
-          let identity = app.decodeMsgPack(app.$route.params.identity)
+          let compressed = app.$route.params.identity
+          while(compressed.indexOf('*') !== -1){
+            compressed = compressed.replace('*','/')
+          }
+          let identity = JSON.parse(zlib.inflateSync(new Buffer(compressed, 'base64')).toString())
           app.address = identity.address
           let transactions = await app.scrypta.get('/transactions/' + app.address)
           let last = transactions.data.length - 1
@@ -104,16 +108,6 @@ export default {
               }
             }
           })
-        },
-        encodeMsgPack(what){
-          let encoded = encode(what).toString('hex')
-          return encoded
-        },
-        decodeMsgPack(what){
-          const fromHexString = hexString => new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
-          let bint = fromHexString(what)
-          let decoded = decode(bint)
-          return decoded
         }
     }
 }

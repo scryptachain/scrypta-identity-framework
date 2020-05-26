@@ -25,7 +25,7 @@
               </a>
           </div>
         </div>
-        <canvas id="qrcode" v-if="showQRCanvas"></canvas>
+        <canvas style="margin-top:20px;" id="qrcode" v-if="showQRCanvas"></canvas>
         <br>
         <b-button  style="width:100%" v-on:click="toggleQR" type="is-primary"><span v-if="!showQRCanvas">SHOW</span><span v-if="showQRCanvas">HIDE</span> QR-CODE</b-button><br>
         <a :href="shareURL" target="_blank"><b-button  style="width:100%" type="is-success">SHARE IDENTITY</b-button></a><br>
@@ -59,10 +59,10 @@
 </template>
 
 <script>
-const msgpack = require('msgpack5')(), encode  = msgpack.encode
 const ScryptaCore = require('@scrypta/core')
 const axios = require('axios')
 const QRious = require('qrious')
+var zlib = require('zlib')
 
 export default {
   name: 'Home',
@@ -194,9 +194,12 @@ export default {
                   
                   sid.identity.address = app.address
                   sid.identity.key = sid.key
-                  let encoded = app.encodeMsgPack(sid.identity)
-                  app.shareURL = 'https://me.scrypta.id/#/share/' + encoded
-                  app.public_qrcode = encoded
+                  let compressed = zlib.deflateSync(JSON.stringify(sid.identity)).toString('base64')
+                  var find = '/'
+                  var re = new RegExp(find, 'g')
+                  compressed = compressed.replace(re, '*')
+                  app.shareURL = 'https://me.scrypta.id/#/share/' + compressed
+                  app.public_qrcode = compressed
                   
                 }else{
                   app.$buefy.toast.open({
@@ -227,10 +230,6 @@ export default {
             cancelable: false
           });
           a.dispatchEvent(clickEvent);
-        },
-        encodeMsgPack(what){
-          let encoded = encode(what).toString('hex')
-          return encoded
         }
     }
 }

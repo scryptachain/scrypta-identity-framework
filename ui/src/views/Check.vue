@@ -16,6 +16,7 @@
         <div v-for="id in linked" v-bind:key="id.refID">
             <a :href="'https://proof.scryptachain.org/#/uuid/' + id.uuid" target="_blank">
               <div v-on:click="revealID(id.refID)" style="border:1px solid #ccc; text-align: left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
+                  <img :src = "'/' + id.refID.toLowerCase() + '.png'" style="float:left; height:75px; margin-right:10px;" />
                   <strong>{{ id.refID }}</strong><br>{{ id.identity.username }}<br>
                   <span v-if="id.identity.id !== undefined">ID: {{ id.identity.id }}<br></span>
                   Written at block <strong>{{ id.block }}</strong><br>
@@ -29,9 +30,9 @@
 </template>
 
 <script>
-const msgpack = require('msgpack5')(), encode  = msgpack.encode, decode = msgpack.decode
 const ScryptaCore = require('@scrypta/core')
 const axios = require('axios')
+var zlib = require('zlib')
 
 export default {
   name: 'Home',
@@ -74,7 +75,11 @@ export default {
     methods: {
         async onDecode(decodedString){
           const app = this
-          let identity = app.decodeMsgPack(decodedString)
+          let compressed = decodedString
+          while(compressed.indexOf('*') !== -1){
+            compressed = compressed.replace('*','/')
+          }
+          let identity = JSON.parse(zlib.inflateSync(new Buffer(compressed, 'base64')).toString())
           app.address = identity.address
           let transactions = await app.scrypta.get('/transactions/' + app.address)
           let last = transactions.data.length - 1
@@ -104,16 +109,6 @@ export default {
               }
             }
           })
-        },
-        encodeMsgPack(what){
-          let encoded = encode(what).toString('hex')
-          return encoded
-        },
-        decodeMsgPack(what){
-          const fromHexString = hexString => new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
-          let bint = fromHexString(what)
-          let decoded = decode(bint)
-          return decoded
         }
     }
 }

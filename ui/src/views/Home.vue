@@ -9,7 +9,7 @@
                             <h1>Link a Digital Identity</h1>
                             <br>to {{ address }}<br><br>
                             <div class="columns" v-bind:class="{ isGithub: isGithub, isGoogle: isGoogle, isTwitter: isTwitter, isLinkedin: isLinkedin, isEmail: isEmail, isPhone: isPhone }">
-                              <div v-for="provider in providers" class="column" v-on:click="selectProvider(provider)" v-bind:key="provider">
+                              <div v-for="provider in providers" class="column is-one-third-mobile" v-on:click="selectProvider(provider)" v-bind:key="provider">
                                   <div :class="'card is-' + provider" style="cursor:pointer">
                                     <div class="card-content">
                                       <img :src="'/'+provider+'.png'" width="100%">
@@ -72,12 +72,12 @@
                     </div>
                     <div v-if="updated">
                         <div class="login-inner-form text-center">
-                            <h4>Process completed!</h4>
+                            <h1>Process completed!</h1>
                             Now is time to download your updated .sid file and sync your dApps and your extension!<br>
                             Please note, no one keeps your identity payload, only you can share it, these informations are not stored in any server.<br><br>
                             <a id="downloadsid" style="display:none"></a>
-                            <b-button v-on:click="downloadSidFile()" type="is-primary">Download .sid file</b-button><br><br>
-                            <a :href="shareURL" target="_blank"><b-button type="is-success">SHARE IDENTITY</b-button></a><br><br>
+                            <b-button v-on:click="downloadSidFile()" style="width:100%" type="is-primary">Download .sid file</b-button><br><br>
+                            <a :href="shareURL" target="_blank"><b-button  style="width:100%" type="is-success">SHARE IDENTITY</b-button></a><br><br>
                             <a href="/">Go back</a>
                         </div>
                     </div>
@@ -371,6 +371,7 @@ export default {
   .home{
     padding: 20px;
   }
+  .column{display:inline-block!important}
   .isGithub .is-github{background:#eee!important}
   .isGoogle .is-google{background:#eee!important}
   .isTwitter .is-twitter{background:#eee!important}
