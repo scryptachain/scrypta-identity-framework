@@ -18,8 +18,8 @@
                 <div style="border:1px solid #ccc; text-align:left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
                     <img :src = "'/' + id.refID.toLowerCase() + '.png'" style="float:left; height:75px; margin-right:10px;" />
                     <strong>{{ id.refID }}</strong>
-                    <div v-if="id.identity.username"><br>{{ id.identity.username }}<br></div>
-                    <span v-if="id.identity.id !== undefined">ID: {{ id.identity.id }}<br></span>
+                    <span v-if="id.identity.username !== undefined && id.identity.username !== ''"><br>{{ id.identity.username }}<br></span>
+                    <span v-if="id.identity.id !== undefined && id.identity.id !== ''">ID: {{ id.identity.id }}<br></span>
                     Written at block <strong>{{ id.block }}</strong><br>
                     {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}
                     <div v-if="id.refID === 'EID'">

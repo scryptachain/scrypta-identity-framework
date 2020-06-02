@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.e09170b7dffe3f620f0a218a311ab78e.js"
+  "/precache-manifest.0b19ac305ee20143126aa38c58fb2964.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "scrypta-id-framework-ui"});
