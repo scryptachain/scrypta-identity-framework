@@ -17,10 +17,23 @@
               <a :href="'https://proof.scryptachain.org/#/uuid/' + id.uuid" target="_blank">
                 <div style="border:1px solid #ccc; text-align:left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
                     <img :src = "'/' + id.refID.toLowerCase() + '.png'" style="float:left; height:75px; margin-right:10px;" />
-                    <strong>{{ id.refID }}</strong><br>{{ id.identity.username }}<br>
+                    <strong>{{ id.refID }}</strong>
+                    <div v-if="id.identity.username"><br>{{ id.identity.username }}<br></div>
                     <span v-if="id.identity.id !== undefined">ID: {{ id.identity.id }}<br></span>
                     Written at block <strong>{{ id.block }}</strong><br>
                     {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}
+                    <div v-if="id.refID === 'EID'">
+                      <div style="display:inline-block;">
+                        <b>SUBJECT</b>: {{ id.identity.payload.subject }}<br>
+                        <b>eID NUMBER</b>: {{ id.identity.payload.id_number }}<br>
+                        <b>NAME</b>: {{ id.identity.payload.name }}<br>
+                        <b>SURNAME</b>: {{ id.identity.payload.surname }}<br>
+                        <b>ISSUED BY</b>: {{ id.identity.payload.issuer }}<br>
+                        <b>OFFICE</b>: {{ id.identity.payload.office }}<br>
+                        <b>COUNTRY</b>: {{ id.identity.payload.country }}<br>
+                        <b>P7M HASH</b>: {{ id.identity.payload.p7mhash }}<br>
+                      </div>
+                    </div>
                 </div>
               </a>
           </div>

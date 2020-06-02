@@ -5,3 +5,6 @@ _template
 phone/
 email/
 providers.online.json
+db/
+temp/*.pem
+temp/*.p7m

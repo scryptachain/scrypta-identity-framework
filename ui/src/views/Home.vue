@@ -8,7 +8,7 @@
                         <div class="details">
                             <h1>Link a Digital Identity</h1>
                             <br>to {{ address }}<br><br>
-                            <div class="columns" v-bind:class="{ isGithub: isGithub, isGoogle: isGoogle, isTwitter: isTwitter, isLinkedin: isLinkedin, isEmail: isEmail, isPhone: isPhone }">
+                            <div class="columns" v-bind:class="{ isGithub: isGithub, isGoogle: isGoogle, isTwitter: isTwitter, isLinkedin: isLinkedin, isEmail: isEmail, isPhone: isPhone, isEid: isEid }">
                               <div v-for="provider in providers" class="column is-one-third-mobile" v-on:click="selectProvider(provider)" v-bind:key="provider">
                                   <div :class="'card is-' + provider" style="cursor:pointer">
                                     <div class="card-content">
@@ -43,13 +43,23 @@
                                     Insert the OTP received by E-Mail:<br><br>
                                     <b-input v-model="emailverification" placeholder="Insert code"></b-input><br>
                                 </div>
+                                <div class="form-group" v-if="provider === 'eid' && showEidVerification === false">
+                                    Insert the eID card number:<br><br>
+                                    <b-input v-model="eidnumber" placeholder="Insert card number"></b-input><br>
+                                    <a id="downloadcid" style="display:none"></a>
+                                </div>
+                                <div class="form-group" v-if="provider === 'eid' && showEidVerification === true">
+                                    Sign your .cie file with your eID card and upload again the .p7m file:<br><br>
+                                    <input type="file" id="file" ref="file" v-on:change="loadP7mFromFile()"/><br><br>
+                                </div>
                                 <div class="form-group row">
                                     <div class="col-12">
-                                        <b-button v-if="provider !== 'phone' && provider !== 'email'" v-on:click="submitVerification()" type="is-primary">Start verification with {{ provider.toUpperCase() }}</b-button>
+                                        <b-button v-if="provider !== 'phone' && provider !== 'email' && provider !== 'eid'" v-on:click="submitVerification()" type="is-primary">Start verification with {{ provider.toUpperCase() }}</b-button>
                                         <b-button v-if="provider === 'phone' && showSmsVerification === false" v-on:click="sendSMS()" type="is-primary">Send verification SMS</b-button>
                                         <b-button v-if="provider === 'phone' && showSmsVerification === true" v-on:click="verifySMS()" type="is-primary">Verify SMS</b-button>
                                         <b-button v-if="provider === 'email' && showEmailVerification === false" v-on:click="sendEmail()" type="is-primary">Send verification e-mail</b-button>
                                         <b-button v-if="provider === 'email' && showEmailVerification === true" v-on:click="verifyEMail()" type="is-primary">Verify e-mail</b-button>
+                                        <b-button v-if="provider === 'eid' && showEidVerification === false" v-on:click="createEidPayload()" type="is-primary">Create e-identity file</b-button>
                                         <br>
                                     </div>
                                 </div>
@@ -60,13 +70,25 @@
                         <div class="login-inner-form" v-if="success">
                             <img src="/success.png" width="200"><br>
                             <br>You've successfully verified your <b>{{ success.toUpperCase() }}</b> account:<br><br>
-                            <b>Username:</b> {{ payload.identity.username }}<br>
+                            <div v-if="payload.identity.username !== undefined">
+                              <b>Username:</b> {{ payload.identity.username }}<br>
+                            </div>
                             <span v-if="payload.identity.id !== undefined">
                               <b>ID:</b> {{ payload.identity.id }}<br><br>
                             </span><br>
+                            <div v-if="success === 'eid'">
+                              <b>SUBJECT</b>: {{ payload.identity.payload.subject }}<br>
+                              <b>eID NUMBER</b>: {{ payload.identity.payload.id_number }}<br>
+                              <b>NAME</b>: {{ payload.identity.payload.name }}<br>
+                              <b>SURNAME</b>: {{ payload.identity.payload.surname }}<br>
+                              <b>ISSUED BY</b>: {{ payload.identity.payload.issuer }}<br>
+                              <b>OFFICE</b>: {{ payload.identity.payload.office }}<br>
+                              <b>COUNTRY</b>: {{ payload.identity.payload.country }}<br>
+                              <b>P7M HASH</b>: {{ payload.identity.payload.p7mhash }}<br><br>
+                            </div>
                             <b-button v-on:click="writeIdentity()" v-if="!isWriting" type="is-primary">Write signature</b-button>
                             <div v-if="isWriting">
-                                {{ workingmessage }}
+                              {{ workingmessage }}
                             </div>
                         </div>
                     </div>
@@ -89,9 +111,9 @@
 </template>
 
 <script>
-const msgpack = require('msgpack5')(), encode  = msgpack.encode, decode = msgpack.decode
 const ScryptaCore = require('@scrypta/core')
 const axios = require('axios')
+var zlib = require('zlib')
 
 export default {
   name: 'Home',
@@ -104,17 +126,20 @@ export default {
         isWriting: false,
         showSmsVerification: false,
         showEmailVerification: false,
+        showEidVerification: false,
         smsverification: '',
         emailverification: '',
+        eidnumber: '',
         unlockPwd: '',
         showQRCanvas: false,
-        isGithub: true,
+        isGithub: false,
         isGoogle: false,
         isTwitter: false,
         isLinkedin: false,
+        isEid: true,
         isEmail: false,
         isPhone: false,
-        provider: 'github',
+        provider: 'eid',
         email: '',
         providers: [],
         phone: '',
@@ -145,7 +170,7 @@ export default {
       let providersRequest = await app.axios.get(app.backendURL + '/providers');
       let providers = providersRequest.data.providers
       app.providers = providers
-      
+
       let check = await this.checkUser()
       if(check === true){
         if(url.indexOf('?') !== -1){
@@ -174,6 +199,7 @@ export default {
           app.isGoogle = false
           app.isPhone = false
           app.isEmail = false
+          app.isEid = false
           app.isLinkedin = false
           app.isTwitter = false
           if(provider === 'github'){
@@ -193,6 +219,9 @@ export default {
           }
           if(provider === 'phone'){
             app.isPhone = true
+          }
+          if(provider === 'eid'){
+            app.isEid = true
           }
         },
         sendEmail(){
@@ -327,8 +356,12 @@ export default {
                             setTimeout(function(){
                               sid.identity.address = app.address
                               sid.identity.key = sid.key
-                              let encoded = app.encodeMsgPack(sid.identity)
-                              app.shareURL = 'https://me.scrypta.id/#/share/' + encoded
+                              let compressed = zlib.deflateSync(JSON.stringify(sid.identity)).toString('base64')
+                              var find = '/'
+                              var re = new RegExp(find, 'g')
+                              compressed = compressed.replace(re, '*')
+                              app.shareURL = 'https://me.scrypta.id/#/share/' + compressed
+                              app.public_qrcode = compressed
                             },30)
                           }else{
                             alert('There\'s an error in the upload, please retry!')
@@ -354,15 +387,70 @@ export default {
             }
           })
         },
-        encodeMsgPack(what){
-          let encoded = encode(what).toString('hex')
-          return encoded
+        createEidPayload(){
+          const app = this
+          if(app.eidnumber !== ''){
+            app.$buefy.dialog.prompt({
+              message: `Enter wallet password`,
+              inputAttrs: {
+                type: "password"
+              },
+              trapFocus: true,
+              onConfirm: async password => {
+                let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
+                if(sid !== false){
+                  let payload = await app.scrypta.signMessage(sid.prv, app.eidnumber)
+                  var a = document.getElementById("downloadcid");
+                  var file = new Blob(
+                    [JSON.stringify(payload)],
+                    { type: "cid" }
+                  );
+                  a.href = URL.createObjectURL(file);
+                  a.download = this.address + ".cid";
+                  var clickEvent = new MouseEvent("click", {
+                    view: window,
+                    bubbles: true,
+                    cancelable: false
+                  });
+                  app.showEidVerification = true
+                  a.dispatchEvent(clickEvent);
+                }else{
+                  app.$buefy.toast.open({
+                    message: "Wrong password!",
+                    type: "is-danger"
+                  });
+                }
+              }
+            })
+          }else{
+            alert('Write e-id card number first!')
+          }
         },
-        decodeMsgPack(what){
-          const fromHexString = hexString => new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
-          let bint = fromHexString(what)
-          let decoded = decode(bint)
-          return decoded
+        loadP7mFromFile(){
+          const app = this;
+          app.file = app.$refs.file.files[0];
+          let formData = new FormData();
+          formData.append('file', app.file);
+          formData.append('address', app.address);
+          formData.append('eidnumber', app.eidnumber);
+          axios.post(app.backendURL + '/eid/verify',
+            formData,
+            {
+              headers: {
+                  'Content-Type': 'multipart/form-data'
+              }
+            }
+          ).then(function(result){
+            if(result.data.error === false && result.data.success.identity.payload.id_number === app.eidnumber){
+              app.success = 'eid'
+              app.payload = result.data.success
+            }else if(result.data.error === true){
+              alert(result.data.message)
+            }
+          })
+          .catch(function(){
+            alert('Something goes wrong with backend please retry.');
+          });
         }
     }
 }
@@ -378,4 +466,5 @@ export default {
   .isLinkedin .is-linkedin{background:#eee!important}
   .isPhone .is-phone{background:#eee!important}
   .isEmail .is-email{background:#eee!important}
+  .isEid .is-eid{background:#eee!important}
 </style> 

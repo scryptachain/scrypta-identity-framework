@@ -32,6 +32,10 @@ app.get('/',
     }
 )
 
+var eid = require('./providers/eid');
+app.use('/', eid);
+availables.push('eid')
+
 if(providers.github !== undefined){
     var github = require('./providers/github');
     app.use('/', github);

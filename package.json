@@ -6,11 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node id.js",
-    "dev": "nodemon id.js"
+    "dev": "nodemon --ignore db id.js"
   },
   "author": "Scrypta Task Force",
   "license": "MIT",
   "dependencies": {
+    "@scrypta/core": "^1.8.2",
     "axios": "^0.19.2",
     "coinkey": "^3.0.0",
     "cookie-parser": "^1.4.5",
@@ -29,7 +30,9 @@
     "pouchdb": "^7.2.1",
     "secp256k1": "^4.0.1",
     "secure-random": "^1.1.2",
-    "twilio": "^3.43.1"
+    "sha256-file": "^1.0.0",
+    "twilio": "^3.43.1",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"
