@@ -13,7 +13,7 @@
           <a :href="'https://proof.scryptachain.org/#/uuid/' + id.uuid" target="_blank">
             <div style="border:1px solid #ccc; text-align: left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
                 <img :src = "'/' + id.refID.toLowerCase() + '.png'" style="float:left; height:75px; margin-right:10px;" />
-                <strong>{{ id.refID }}</strong><br>
+                <strong>{{ id.refID }}</strong>
                 <span v-if="id.identity.username !== undefined && id.identity.username !== ''"><br>{{ id.identity.username }}<br></span>
                 <span v-if="id.identity.id !== undefined && id.identity.id !== ''">ID: {{ id.identity.id }}<br></span>
                 Written at block <strong>{{ id.block }}</strong><br>

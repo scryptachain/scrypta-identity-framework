@@ -95,6 +95,7 @@
                     <div v-if="updated">
                         <div class="login-inner-form text-center">
                             <h1>Process completed!</h1>
+                            <br><br>
                             Now is time to download your updated .sid file and sync your dApps and your extension!<br>
                             Please note, no one keeps your identity payload, only you can share it, these informations are not stored in any server.<br><br>
                             <a id="downloadsid" style="display:none"></a>
@@ -347,7 +348,7 @@ export default {
                         }
                         app.workingmessage = 'Uploading data to the blockchain...'
                         app.scrypta.write(app.encrypted_wallet, password, JSON.stringify(message), '', app.success.toUpperCase() , 'I://').then(res => {
-                          if(res.uuid !== undefined){
+                          if(res.uuid !== undefined && res.txs.length >= 1 && res.txs[0] !== null){
                             app.isWriting = false
                             app.workingmessage = 'Data written correctly.'
                             app.payload = ''
