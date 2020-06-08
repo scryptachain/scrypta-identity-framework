@@ -11,6 +11,7 @@
           <b-navbar-item href="/#/">Create Identity</b-navbar-item>
           <b-navbar-item href="/#/identities">My Identity</b-navbar-item>
           <b-navbar-item href="/#/check">Check Identity</b-navbar-item>
+          <b-navbar-item href="/#/search">Search User</b-navbar-item>
         </template>
 
         <template slot="end">
