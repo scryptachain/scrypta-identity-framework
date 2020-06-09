@@ -52,7 +52,7 @@
 									<a class="navbar-brand" href="/" rel="home">
 										<span class="navbar-brand-inner">
 											<img class="logo-default" src="./assets/img/logo-id.png" style="width: 15%"
-												alt="Ave HTML Template">
+												alt="Scrypta ID">
 										</span>
 									</a>
 									<button type="button" class="navbar-toggle collapsed nav-trigger style-mobile"
@@ -75,7 +75,8 @@
 
 									<ul id="primary-nav"
 										class="main-nav main-nav-hover-underline-2 nav align-items-lg-stretch justify-content-lg-center"
-										data-submenu-options='{ "toggleType": "fade", "handler": "mouse-in-out" }'>
+										data-submenu-options='{ "toggleType": "fade", "handler": "mouse-in-out" }'
+										data-localscroll="true">
 										<li class="current-menu-item">
 											<a href="/">
 												<span class="link-icon"></span>
@@ -283,7 +284,7 @@
 												data-parallax-options='{"overflowHidden":false,"easing":"linear"}'>
 												<figure>
 													<img src="./assets/demo/misc/parallax-obj-1.svg"
-														alt="Good Design" />
+														/>
 												</figure>
 											</div><!-- /.liquid-img-container-inner -->
 										</div><!-- /.liquid-img-group-img-container -->
@@ -297,7 +298,7 @@
 												data-parallax-options='{"overflowHidden":false,"easing":"linear"}'>
 												<figure>
 													<img src="./assets/demo/misc/parallax-obj-2.svg"
-														alt="Good Design" />
+														/>
 												</figure>
 											</div><!-- /.liquid-img-container-inner -->
 										</div><!-- /.liquid-img-group-img-container -->
@@ -310,7 +311,7 @@
 												data-parallax-to='{"translateY": 0}'
 												data-parallax-options='{"overflowHidden":true,"easing":"linear"}'>
 												<figure>
-													<img src="./assets/img/cie.png" alt="Good Design" />
+													<img src="./assets/img/cie.png" />
 												</figure>
 											</div><!-- /.liquid-img-container-inner -->
 										</div><!-- /.liquid-img-group-img-container -->
@@ -659,7 +660,7 @@
 			<!-- /. use cases-->
 
 			<!-- providers -->
-			<section class="vc_row pt-55 pb-80">
+			<section class="vc_row pt-55 pb-50">
 				<div class="container">
 					<div class="row">
 
@@ -955,7 +956,7 @@
 												data-parallax-to='{"translateY":-78}'
 												data-parallax-options='{"overflowHidden":false, "easing":"linear"}'>
 												<figure class="w-90">
-													<img src="./assets/img/extension1.jpg" alt="Working with Ave" />
+													<img src="./assets/img/extension1.jpg" alt="extension browser" />
 												</figure>
 											</div><!-- /.liquid-img-container-inner -->
 										</div><!-- /.liquid-img-group-img-container -->
@@ -971,7 +972,7 @@
 												data-parallax-to='{"translateY":-134}'
 												data-parallax-options='{"overflowHidden":false,"easing":"linear"}'>
 												<figure>
-													<img src="./assets/img/extension2.jpg" alt="Working with Ave" />
+													<img src="./assets/img/extension2.jpg" alt="extension browser" />
 												</figure>
 											</div><!-- /.liquid-img-container-inner -->
 										</div><!-- /.liquid-img-group-img-container -->
@@ -1311,6 +1312,10 @@
 </body>
 
 <style>
+	.row-bg-loader {
+		display: none !important;
+	}
+
 	.bg-ebony-clay {
 		background: #02394A !important;
 	}
