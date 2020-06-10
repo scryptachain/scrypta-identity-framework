@@ -42,16 +42,18 @@
 		<header class="main-header main-header-overlay">
 
 			<div class="mainbar-wrap">
-
-				<div class="container mainbar-container">
+				<div class="megamenu-hover-bg"></div><!-- /.megamenu-hover-bg -->
+				<div class="container-fluid mainbar-container">
 					<div class="mainbar">
-						<div class="row mainbar-row align-items-lg-stretch">
+						<div class="row mainbar-row align-items-lg-stretch px-4">
 
-							<div class="col">
+							<div class="col pr-5">
 								<div class="navbar-header">
 									<a class="navbar-brand" href="/" rel="home">
 										<span class="navbar-brand-inner">
-											<img class="logo-default" src="./assets/img/logo-id.png" style="width: 15%"
+											<img class="mobile-logo-default" src="./assets/img/logo-id.png" style="width: 80%;"
+												alt="Scrypta ID">
+											<img class="logo-default" src="./assets/img/logo-id.png" style="width: 15%;"
 												alt="Scrypta ID">
 										</span>
 									</a>
@@ -68,17 +70,17 @@
 								</div><!-- /.navbar-header -->
 							</div><!-- /.col -->
 
-							<div class="col text-center">
+							<div class="col-8">
 
-								<div class="collapse navbar-collapse" id="main-header-collapse" aria-expanded="false"
-									role="tablist">
+								<div class="collapse navbar-collapse" id="main-header-collapse">
 
 									<ul id="primary-nav"
-										class="main-nav main-nav-hover-underline-2 nav align-items-lg-stretch justify-content-lg-center"
-										data-submenu-options='{ "toggleType": "fade", "handler": "mouse-in-out" }'
+										class="main-nav main-nav-hover-underline-1 nav align-items-lg-stretch justify-content-lg-center"
+										data-submenu-options='{ "toggleType":"fade", "handler":"mouse-in-out" }'
 										data-localscroll="true">
-										<li class="current-menu-item">
-											<a href="/">
+
+										<li class="is-active">
+											<a href="#content">
 												<span class="link-icon"></span>
 												<span class="link-txt">
 													<span class="link-ext"></span>
@@ -87,7 +89,7 @@
 											</a>
 										</li>
 										<li>
-											<a href="#cie">
+											<a href="#digitalid">
 												<span class="link-icon"></span>
 												<span class="link-txt">
 													<span class="link-ext"></span>
@@ -122,47 +124,25 @@
 												</span>
 											</a>
 										</li>
-									</ul>
+										<li>
+											<a class="text-hover-white mob_lang" title="English" href="/en/">
+												<img src="/assets/img/misc/usa.png">
+												<span style="margin-left: 5px;">En</span>
+											</a>
+										</li>
+									</ul><!-- /#primary-nav  -->
 
-								</div><!-- /.collapse -->
+								</div><!-- /#main-header-collapse -->
 
 							</div><!-- /.col -->
-
 							<div class="col text-right">
-
-								<div class="header-module">
-
-									<a href="https://srypta.wiki/"
-										class="btn btn-default text-uppercase btn-sm circle btn-bordered border-thin btn-gradient font-size-13 font-weight-bold ltr-sp-1 px-3 color-secondary">
-										<span>
-											<span class="btn-txt" style="color: white;">Scopri di più</span>
-											<span class="btn-gradient-bg btn-gradient-bg-hover"></span>
-											<svg xmlns="http://www.w3.org/2000/svg"
-												xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
-												class="btn-gradient-border" width="100%" height="100%">
-												<defs>
-													<linearGradient id="svg-border-1" x1="0%" y1="0%" x2="100%" y2="0%">
-														<stop offset="0%" style="stop-color: white;"></stop>
-														<stop offset="100%" style="stop-color: white;"></stop>
-													</linearGradient>
-												</defs>
-												<rect x="0.5" y="0.5" rx="25" ry="25" width="100%" height="100%"
-													stroke="url(#svg-border-1)"></rect>
-											</svg>
-										</span>
-									</a>
-
-								</div><!-- /.header-module -->
-
 							</div><!-- /.col -->
-
-						</div><!-- /.maonbar-row -->
+						</div><!-- /.mainbar-row -->
 					</div><!-- /.mainbar -->
 				</div><!-- /.mainbar-container -->
-
 			</div><!-- /.mainbar-wrap -->
 
-		</header>
+		</header><!-- /.main-header -->
 
 		<main id="content" class="content">
 
@@ -267,7 +247,7 @@
 
 
 			<!-- CIE -->
-			<section id="cie" class="vc_row pt-50 bg-gradient-primary-35p bg-md-none mb-80">
+			<section id="digitalid" class="vc_row pt-50 bg-gradient-primary-35p bg-md-none mb-80">
 				<div class="container">
 					<div class="row d-flex flex-wrap align-items-center">
 
@@ -561,7 +541,7 @@
 											<h2 class="mb-55 lh-125" data-fittext="true"
 												data-fittext-options='{"compressor":0.85,"maxFontSize":"50","minFontSize":"32"}'
 												data-split-text="true" data-split-options='{"type":"lines"}'>
-												<span class="ld-fh-txt">Operazioni certificate in blockchain.</span>
+												<span class="ld-fh-txt">Operazioni certificate in blockchain</span>
 											</h2>
 										</div><!-- /.ld-fancy-heading -->
 
@@ -582,28 +562,7 @@
 										<div class="ld-fancy-heading">
 											<h2 class="mb-55 lh-125" data-fittext="true"
 												data-fittext-options='{"compressor":0.85,"maxFontSize":"50","minFontSize":"32"}'>
-												<span class="ld-fh-txt">Self-Sovereign Identity.</span>
-											</h2>
-										</div><!-- /.ld-fancy-heading -->
-
-										<div class="ld-fancy-heading mb-1 mb-md-6">
-											<p class="font-size-20 lh-16">
-												<span class="ld-fh-txt" style="color: #676767;">Il framework Scrypta ID
-													prevede la possibilità di realizzare i propri Gateway
-													“certificatori” archiviando totalmente offline le credenziali dei
-													propri utenti. Alti livelli di privacy e sicurezza rendono il
-													framework adatto a ogni sistema KYC.
-												</span>
-											</p>
-										</div><!-- /.ld-fancy-heading -->
-
-									</div><!-- /.carousel-item -->
-
-									<div class="carousel-item col-xs-12 px-0">
-										<div class="ld-fancy-heading">
-											<h2 class="mb-55 lh-125" data-fittext="true"
-												data-fittext-options='{"compressor":0.85,"maxFontSize":"50","minFontSize":"32"}'>
-												<span class="ld-fh-txt">Know Your Customer.</span>
+												<span class="ld-fh-txt">Self-Sovereign Identity</span>
 											</h2>
 										</div><!-- /.ld-fancy-heading -->
 
@@ -614,6 +573,27 @@
 													blockchain e autenticare la propria identità usando le credenziali
 													emesse da provider esterni in modo decentralizzato. Non devi più
 													rinunciare al controllo delle informazioni personali.
+												</span>
+											</p>
+										</div><!-- /.ld-fancy-heading -->
+
+									</div><!-- /.carousel-item -->
+
+									<div class="carousel-item col-xs-12 px-0">
+										<div class="ld-fancy-heading">
+											<h2 class="mb-55 lh-125" data-fittext="true"
+												data-fittext-options='{"compressor":0.85,"maxFontSize":"50","minFontSize":"32"}'>
+												<span class="ld-fh-txt">Know Your Customer</span>
+											</h2>
+										</div><!-- /.ld-fancy-heading -->
+
+										<div class="ld-fancy-heading mb-1 mb-md-6">
+											<p class="font-size-20 lh-16">
+												<span class="ld-fh-txt" style="color: #676767;">Il framework Scrypta ID
+													prevede la possibilità di realizzare i propri Gateway
+													“certificatori” archiviando totalmente offline le credenziali dei
+													propri utenti. Alti livelli di privacy e sicurezza rendono il
+													framework adatto a ogni sistema KYC.
 												</span>
 											</p>
 										</div><!-- /.ld-fancy-heading -->
@@ -1339,10 +1319,6 @@
 
 		.desk_dapps {
 			display: none !important;
-		}
-
-		.logo-default {
-			width: 80% !important;
 		}
 
 	}
