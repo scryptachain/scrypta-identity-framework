@@ -322,6 +322,7 @@ export default {
         async writeIdentity(){
           const app = this
           let balance = await app.scrypta.get('/balance/' + app.address)
+          app.isWriting = true
           if(balance.balance > 0.001){
             app.$buefy.dialog.prompt({
               message: `Enter wallet password`,
@@ -332,7 +333,6 @@ export default {
               onConfirm: async password => {
                 let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
                 if(sid !== false){
-                  app.isWriting = true
                   let private_key = sid.prv
                   app.workingmessage = 'Signing identity with private key...'
                   var toStore = {
@@ -386,9 +386,11 @@ export default {
                           })
                         }else{
                           alert('Something goes wrong, retry please!')
+                          app.isWriting = false
                         }
                       }else{
                         alert('Something goes wrong, retry please!')
+                        app.isWriting = false
                       }
                     })
                 } else {
@@ -396,6 +398,7 @@ export default {
                     message: "Wrong password!",
                     type: "is-danger"
                   });
+                  app.isWriting = false
                 }
               }
             })
