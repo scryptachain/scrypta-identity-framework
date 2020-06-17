@@ -319,84 +319,92 @@ export default {
           });
           a.dispatchEvent(clickEvent);
         },
-        writeIdentity(){
+        async writeIdentity(){
           const app = this
-          app.$buefy.dialog.prompt({
-            message: `Enter wallet password`,
-            inputAttrs: {
-              type: "password"
-            },
-            trapFocus: true,
-            onConfirm: async password => {
-              let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
-              if(sid !== false){
-                app.isWriting = true
-                let private_key = sid.prv
-                app.workingmessage = 'Signing identity with private key...'
-                var toStore = {
-                  identity: app.payload.identity,
-                  fingerprint: app.payload.fingerprint
-                }
-                app.scrypta.signMessage(private_key, JSON.stringify(toStore)).then(async signed => {
-                  if(sid.identity === undefined){
-                    sid.identity = {}
+          let balance = await app.scrypta.get('/balance/' + app.address)
+          if(balance.balance > 0.001){
+            app.$buefy.dialog.prompt({
+              message: `Enter wallet password`,
+              inputAttrs: {
+                type: "password"
+              },
+              trapFocus: true,
+              onConfirm: async password => {
+                let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
+                if(sid !== false){
+                  app.isWriting = true
+                  let private_key = sid.prv
+                  app.workingmessage = 'Signing identity with private key...'
+                  var toStore = {
+                    identity: app.payload.identity,
+                    fingerprint: app.payload.fingerprint
                   }
-                  sid.identity[app.success] = {}
-                  sid.identity[app.success] = toStore
+                  app.scrypta.signMessage(private_key, JSON.stringify(toStore)).then(async signed => {
+                    if(sid.identity === undefined){
+                      sid.identity = {}
+                    }
+                    sid.identity[app.success] = {}
+                    sid.identity[app.success] = toStore
 
-                  if(sid.identity[app.success] === toStore){
-                      await app.scrypta.buildWallet(password, app.address, sid, true)
-                      let newkey = await app.scrypta.returnIdentity(app.address)
-                      let confirm = await app.scrypta.readKey(password, newkey.wallet)
-                      if(confirm.identity[app.success].fingerprint === toStore.fingerprint){
-                        app.encrypted_wallet = newkey.wallet
-                        localStorage.setItem('SID', newkey.wallet)
-                        let message = {
-                          signature: signed.signature,
-                          gateway: app.payload.gateway,
-                          fingerprint: app.payload.fingerprint
-                        }
-                        app.workingmessage = 'Uploading data to the blockchain...'
-                        app.scrypta.write(app.encrypted_wallet, password, JSON.stringify(message), '', app.success.toUpperCase() , 'I://').then(res => {
-                          if(res.uuid !== undefined && res.txs.length >= 1 && res.txs[0] !== null){
-                            app.isWriting = false
-                            app.workingmessage = 'Data written correctly.'
-                            app.payload = ''
-                            app.decrypted_wallet = 'WALLET LOCKED'
-                            app.updated = app.encrypted_wallet
-                            setTimeout(function(){
-                              sid.identity.address = app.address
-                              sid.identity.key = sid.key
-                              let compressed = zlib.deflateSync(JSON.stringify(sid.identity)).toString('base64')
-                              var find = '/'
-                              var re = new RegExp(find, 'g')
-                              compressed = compressed.replace(re, '*')
-                              app.shareURL = 'https://me.scrypta.id/#/share/' + compressed
-                              app.public_qrcode = compressed
-                            },30)
-                          }else{
+                    if(sid.identity[app.success] === toStore){
+                        await app.scrypta.buildWallet(password, app.address, sid, true)
+                        let newkey = await app.scrypta.returnIdentity(app.address)
+                        let confirm = await app.scrypta.readKey(password, newkey.wallet)
+                        if(confirm.identity[app.success].fingerprint === toStore.fingerprint){
+                          app.encrypted_wallet = newkey.wallet
+                          localStorage.setItem('SID', newkey.wallet)
+                          let message = {
+                            signature: signed.signature,
+                            gateway: app.payload.gateway,
+                            fingerprint: app.payload.fingerprint
+                          }
+                          app.workingmessage = 'Uploading data to the blockchain...'
+                          app.scrypta.write(app.encrypted_wallet, password, JSON.stringify(message), '', app.success.toUpperCase() , 'I://').then(res => {
+                            if(res.uuid !== undefined && res.txs.length >= 1 && res.txs[0] !== null){
+                              app.isWriting = false
+                              app.workingmessage = 'Data written correctly.'
+                              app.payload = ''
+                              app.decrypted_wallet = 'WALLET LOCKED'
+                              app.updated = app.encrypted_wallet
+                              setTimeout(function(){
+                                sid.identity.address = app.address
+                                sid.identity.key = sid.key
+                                let compressed = zlib.deflateSync(JSON.stringify(sid.identity)).toString('base64')
+                                var find = '/'
+                                var re = new RegExp(find, 'g')
+                                compressed = compressed.replace(re, '*')
+                                app.shareURL = 'https://me.scrypta.id/#/share/' + compressed
+                                app.public_qrcode = compressed
+                              },30)
+                            }else{
+                              alert('There\'s an error in the upload, please retry!')
+                              app.isWriting = false
+                            }
+                          }).catch(() => {
                             alert('There\'s an error in the upload, please retry!')
                             app.isWriting = false
-                          }
-                        }).catch(() => {
-                          alert('There\'s an error in the upload, please retry!')
-                          app.isWriting = false
-                        })
+                          })
+                        }else{
+                          alert('Something goes wrong, retry please!')
+                        }
                       }else{
                         alert('Something goes wrong, retry please!')
                       }
-                    }else{
-                      alert('Something goes wrong, retry please!')
-                    }
-                  })
-              } else {
-                app.$buefy.toast.open({
-                  message: "Wrong password!",
-                  type: "is-danger"
-                });
+                    })
+                } else {
+                  app.$buefy.toast.open({
+                    message: "Wrong password!",
+                    type: "is-danger"
+                  });
+                }
               }
-            }
-          })
+            })
+          }else{
+            app.$buefy.toast.open({
+              message: "You need at least 0.001 LYRA in your wallet!",
+              type: "is-danger"
+            })
+          }
         },
         createEidPayload(){
           const app = this
