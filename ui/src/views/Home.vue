@@ -8,7 +8,7 @@
                         <div class="details">
                             <h1>Link a Digital Identity</h1>
                             <br>to {{ address }}<br><br>
-                            <div class="columns" v-bind:class="{ isGithub: isGithub, isGoogle: isGoogle, isTwitter: isTwitter, isLinkedin: isLinkedin, isEmail: isEmail, isPhone: isPhone, isEid: isEid }">
+                            <div class="columns" v-bind:class="{ isGithub: isGithub, isGoogle: isGoogle, isTwitter: isTwitter, isLinkedin: isLinkedin, isEmail: isEmail, isPhone: isPhone, isEid: isEid, isEthereum: isEthereum }">
                               <div v-for="provider in providers" class="column is-one-third-mobile" v-on:click="selectProvider(provider)" v-bind:key="provider">
                                   <div :class="'card is-' + provider" style="cursor:pointer">
                                     <div class="card-content">
@@ -54,12 +54,13 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-12">
-                                        <b-button v-if="provider !== 'phone' && provider !== 'email' && provider !== 'eid'" v-on:click="submitVerification()" type="is-primary">Start verification with {{ provider.toUpperCase() }}</b-button>
+                                        <b-button v-if="provider !== 'phone' && provider !== 'email' && provider !== 'eid' && provider !== 'ethereum'" v-on:click="submitVerification()" type="is-primary">Start verification with {{ provider.toUpperCase() }}</b-button>
                                         <b-button v-if="provider === 'phone' && showSmsVerification === false" v-on:click="sendSMS()" type="is-primary">Send verification SMS</b-button>
                                         <b-button v-if="provider === 'phone' && showSmsVerification === true" v-on:click="verifySMS()" type="is-primary">Verify SMS</b-button>
                                         <b-button v-if="provider === 'email' && showEmailVerification === false" v-on:click="sendEmail()" type="is-primary">Send verification e-mail</b-button>
                                         <b-button v-if="provider === 'email' && showEmailVerification === true" v-on:click="verifyEMail()" type="is-primary">Verify e-mail</b-button>
                                         <b-button v-if="provider === 'eid' && showEidVerification === false" v-on:click="createEidPayload()" type="is-primary">Create e-identity file</b-button>
+                                        <b-button v-if="provider === 'ethereum'" v-on:click="signWithEthereum()" type="is-primary">Start verification with ETH</b-button>
                                         <br>
                                     </div>
                                 </div>
@@ -115,6 +116,10 @@
 const ScryptaCore = require('@scrypta/core')
 const axios = require('axios')
 var zlib = require('zlib')
+var ethUtil = require('ethereumjs-util')
+var sigUtil = require('eth-sig-util')
+const web3 = window.web3
+const ethereum = window.ethereum
 
 export default {
   name: 'Home',
@@ -139,6 +144,7 @@ export default {
         isLinkedin: false,
         isEid: true,
         isEmail: false,
+        isEthereum: false,
         isPhone: false,
         provider: 'eid',
         email: '',
@@ -201,6 +207,7 @@ export default {
           app.isPhone = false
           app.isEmail = false
           app.isEid = false
+          app.isEthereum = false
           app.isLinkedin = false
           app.isTwitter = false
           if(provider === 'github'){
@@ -208,6 +215,9 @@ export default {
           }
           if(provider === 'google'){
             app.isGoogle = true
+          }
+          if(provider === 'ethereum'){
+            app.isEthereum = true
           }
           if(provider === 'twitter'){
             app.isTwitter = true
@@ -309,84 +319,95 @@ export default {
           });
           a.dispatchEvent(clickEvent);
         },
-        writeIdentity(){
+        async writeIdentity(){
           const app = this
-          app.$buefy.dialog.prompt({
-            message: `Enter wallet password`,
-            inputAttrs: {
-              type: "password"
-            },
-            trapFocus: true,
-            onConfirm: async password => {
-              let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
-              if(sid !== false){
-                app.isWriting = true
-                let private_key = sid.prv
-                app.workingmessage = 'Signing identity with private key...'
-                var toStore = {
-                  identity: app.payload.identity,
-                  fingerprint: app.payload.fingerprint
-                }
-                app.scrypta.signMessage(private_key, JSON.stringify(toStore)).then(async signed => {
-                  if(sid.identity === undefined){
-                    sid.identity = {}
+          let balance = await app.scrypta.get('/balance/' + app.address)
+          app.isWriting = true
+          if(balance.balance > 0.001){
+            app.$buefy.dialog.prompt({
+              message: `Enter wallet password`,
+              inputAttrs: {
+                type: "password"
+              },
+              trapFocus: true,
+              onConfirm: async password => {
+                let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
+                if(sid !== false){
+                  let private_key = sid.prv
+                  app.workingmessage = 'Signing identity with private key...'
+                  var toStore = {
+                    identity: app.payload.identity,
+                    fingerprint: app.payload.fingerprint
                   }
-                  sid.identity[app.success] = {}
-                  sid.identity[app.success] = toStore
+                  app.scrypta.signMessage(private_key, JSON.stringify(toStore)).then(async signed => {
+                    if(sid.identity === undefined){
+                      sid.identity = {}
+                    }
+                    sid.identity[app.success] = {}
+                    sid.identity[app.success] = toStore
 
-                  if(sid.identity[app.success] === toStore){
-                      await app.scrypta.buildWallet(password, app.address, sid, true)
-                      let newkey = await app.scrypta.returnIdentity(app.address)
-                      let confirm = await app.scrypta.readKey(password, newkey.wallet)
-                      if(confirm.identity[app.success].fingerprint === toStore.fingerprint){
-                        app.encrypted_wallet = newkey.wallet
-                        localStorage.setItem('SID', newkey.wallet)
-                        let message = {
-                          signature: signed.signature,
-                          gateway: app.payload.gateway,
-                          fingerprint: app.payload.fingerprint
-                        }
-                        app.workingmessage = 'Uploading data to the blockchain...'
-                        app.scrypta.write(app.encrypted_wallet, password, JSON.stringify(message), '', app.success.toUpperCase() , 'I://').then(res => {
-                          if(res.uuid !== undefined && res.txs.length >= 1 && res.txs[0] !== null){
-                            app.isWriting = false
-                            app.workingmessage = 'Data written correctly.'
-                            app.payload = ''
-                            app.decrypted_wallet = 'WALLET LOCKED'
-                            app.updated = app.encrypted_wallet
-                            setTimeout(function(){
-                              sid.identity.address = app.address
-                              sid.identity.key = sid.key
-                              let compressed = zlib.deflateSync(JSON.stringify(sid.identity)).toString('base64')
-                              var find = '/'
-                              var re = new RegExp(find, 'g')
-                              compressed = compressed.replace(re, '*')
-                              app.shareURL = 'https://me.scrypta.id/#/share/' + compressed
-                              app.public_qrcode = compressed
-                            },30)
-                          }else{
+                    if(sid.identity[app.success] === toStore){
+                        await app.scrypta.buildWallet(password, app.address, sid, true)
+                        let newkey = await app.scrypta.returnIdentity(app.address)
+                        let confirm = await app.scrypta.readKey(password, newkey.wallet)
+                        if(confirm.identity[app.success].fingerprint === toStore.fingerprint){
+                          app.encrypted_wallet = newkey.wallet
+                          localStorage.setItem('SID', newkey.wallet)
+                          let message = {
+                            signature: signed.signature,
+                            gateway: app.payload.gateway,
+                            fingerprint: app.payload.fingerprint
+                          }
+                          app.workingmessage = 'Uploading data to the blockchain...'
+                          app.scrypta.write(app.encrypted_wallet, password, JSON.stringify(message), '', app.success.toUpperCase() , 'I://').then(res => {
+                            if(res.uuid !== undefined && res.txs.length >= 1 && res.txs[0] !== null){
+                              app.isWriting = false
+                              app.workingmessage = 'Data written correctly.'
+                              app.payload = ''
+                              app.decrypted_wallet = 'WALLET LOCKED'
+                              app.updated = app.encrypted_wallet
+                              setTimeout(function(){
+                                sid.identity.address = app.address
+                                sid.identity.key = sid.key
+                                let compressed = zlib.deflateSync(JSON.stringify(sid.identity)).toString('base64')
+                                var find = '/'
+                                var re = new RegExp(find, 'g')
+                                compressed = compressed.replace(re, '*')
+                                app.shareURL = 'https://me.scrypta.id/#/share/' + compressed
+                                app.public_qrcode = compressed
+                              },30)
+                            }else{
+                              alert('There\'s an error in the upload, please retry!')
+                              app.isWriting = false
+                            }
+                          }).catch(() => {
                             alert('There\'s an error in the upload, please retry!')
                             app.isWriting = false
-                          }
-                        }).catch(() => {
-                          alert('There\'s an error in the upload, please retry!')
+                          })
+                        }else{
+                          alert('Something goes wrong, retry please!')
                           app.isWriting = false
-                        })
+                        }
                       }else{
                         alert('Something goes wrong, retry please!')
+                        app.isWriting = false
                       }
-                    }else{
-                      alert('Something goes wrong, retry please!')
-                    }
-                  })
-              } else {
-                app.$buefy.toast.open({
-                  message: "Wrong password!",
-                  type: "is-danger"
-                });
+                    })
+                } else {
+                  app.$buefy.toast.open({
+                    message: "Wrong password!",
+                    type: "is-danger"
+                  });
+                  app.isWriting = false
+                }
               }
-            }
-          })
+            })
+          }else{
+            app.$buefy.toast.open({
+              message: "You need at least 0.001 LYRA in your wallet!",
+              type: "is-danger"
+            })
+          }
         },
         createEidPayload(){
           const app = this
@@ -452,6 +473,50 @@ export default {
           .catch(function(){
             alert('Something goes wrong with backend please retry.');
           });
+        },
+        signWithEthereum(){
+          const app = this
+          var from = web3.eth.accounts[0]
+          if (!from) return app.ethConnect()
+
+          var text = JSON.stringify({
+            timestamp: new Date().getTime(),
+            message: "SCRYPTAID-ETH VERIFICATION",
+            host: app.address,
+            address: from
+          })
+          var msg = ethUtil.bufferToHex(new Buffer(text, 'utf8'))
+          var params = [msg, from]
+          var method = 'personal_sign'
+
+          web3.currentProvider.sendAsync({
+            method,
+            params,
+            from,
+          }, function (err, result) {
+            if (!err && !result.error){
+              let proof = { data: msg }
+              proof.sig = result.result
+              const recheck = sigUtil.recoverPersonalSignature(proof)
+
+              if (recheck === from ) {
+                app.axios.post(app.backendURL + '/ethereum/verify', {proof: proof, address: from}).then(result => {
+                  if(result.data.status === 200){
+                    app.payload = result.data.success
+                    app.success = 'ethereum'
+                  }else{
+                    alert('Something goes wrong, please retry!')
+                  }
+                })
+              } else {
+                alert('SigUtil Failed to verify signer when comparing ' + recheck.result + ' to ' + from)
+              }}
+            })
+        },
+        ethConnect(){
+          if (typeof ethereum !== 'undefined') {
+            ethereum.enable()
+          }
         }
     }
 }
@@ -468,4 +533,5 @@ export default {
   .isPhone .is-phone{background:#eee!important}
   .isEmail .is-email{background:#eee!important}
   .isEid .is-eid{background:#eee!important}
+  .isEthereum .is-ethereum{background:#eee!important}
 </style> 

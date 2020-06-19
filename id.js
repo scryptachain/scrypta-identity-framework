@@ -72,6 +72,10 @@ if(providers.email !== undefined){
     availables.push('email')
 }
 
+var ethereum = require('./providers/ethereum');
+app.use('/', ethereum);
+availables.push('ethereum')
+
 app.get('/auth/error', function (req, res) {
     res.json({message: 'Authentication failed', status: 401})
 })

@@ -30,6 +30,9 @@
             </a>
         </div>
       </div>
+      <div v-if="Object.keys(identities).length === 0 && $route.params.address">
+        <br><br>We're sorry, but there's nothing linked.
+      </div>
     </div>
   </div>
 </template>
