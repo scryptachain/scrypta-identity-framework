@@ -6,5 +6,5 @@
 
 Scrypta identity framework, link multiple identities to Lyra addresses
 
-[**Wiki English**](//en.scrypta.wiki/id/general-description.html#scrypta-id-features "English — Scrypta Wiki") · · · [**Wiki italiano**](//it.scrypta.wiki/id/descrizione-generale.html "Italiano — Scrypta Wiki")
+[**Wiki English**](//en.scrypta.wiki/id/general-description.html#scrypta-id-features "English — Scrypta Wiki" target="_blank") · · · [**Wiki italiano**](//it.scrypta.wiki/id/descrizione-generale.html "Italiano — Scrypta Wiki")
 
