@@ -3,7 +3,14 @@
     <div class="login-7 tab-box">
       <h1>Your Digital Identity</h1>
       <div v-if="isLoading"><br>Loading informations from the blockchain...</div>
-      <div v-if="!isLoading && Object.keys(identities).length === 0"><br>Nothing to show, start creating your first digital identity.</div>
+      <div v-if="!isLoading && Object.keys(identities).length === 0"><br>
+        <div style="border:1px solid #ccc; text-align:left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
+            <v-gravatar :email="address" style="float:left; height:55px; margin-right:10px;" />
+            <strong>LYRA ADDRESS</strong><br>
+            Created at block <strong>{{ first_tx.blockheight }}</strong><br>
+            {{ address.substr(0,6) }}...{{ address.substr(-6) }}<br>
+        </div>
+      </div>
       <div v-if="linked.length > 0">
         <div v-if="!showQRCanvas">
           <br>These are your <b>private</b> informations, share it only with trusted parties:
@@ -52,7 +59,7 @@
             Created at block <strong>{{ first_tx.blockheight }}</strong><br>
             {{ address.substr(0,6) }}...{{ address.substr(-6) }}<br>
         </div>
-        <div v-for="id in identities" v-bind:key="id.refID">
+        <div v-for="id in identities" style="position:relative" v-bind:key="id.refID">
             <a :href="'https://proof.scryptachain.org/#/uuid/' + id.uuid" target="_blank">
               <div style="border:1px solid #ccc; text-align:left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
                   <img :src = "'/' + id.refID.toLowerCase() + '.png'" style="float:left; height:55px; margin-right:10px;" />
@@ -60,6 +67,9 @@
                   Written at block <strong>{{ id.block }}</strong><br>
                   {{ id.data.signature.substr(0,6) }} ... {{ id.data.signature.substr(-6) }}
               </div>
+            </a>
+            <a href="#" v-on:click="revokeID(id.uuid)">
+              <b-icon style="position:absolute; z-index:10; cursor:pointer; top:27px; right:30px" icon="account-minus" size="is-medium"></b-icon>
             </a>
         </div>
         <br>
@@ -243,6 +253,38 @@ export default {
             cancelable: false
           });
           a.dispatchEvent(clickEvent);
+        },
+        revokeID(uuid){
+          const app = this
+          app.$buefy.dialog.prompt({
+            message: `Enter wallet password`,
+            inputAttrs: {
+              type: "password"
+            },
+            trapFocus: true,
+            onConfirm: async password => {
+              let sid = await app.scrypta.readKey(password, app.encrypted_wallet);
+              if(sid !== false){
+                let invalidated = await app.scrypta.invalidate(app.encrypted_wallet, password, uuid)
+                if(invalidated !== false){
+                  app.$buefy.toast.open({
+                    message: "Identity invalidated correctly, please wait at least 2 minutes.",
+                    type: "is-success"
+                  });
+                }else{
+                  app.$buefy.toast.open({
+                    message: "Wrong password!",
+                    type: "is-danger"
+                  });
+                }
+              } else {
+                app.$buefy.toast.open({
+                  message: "Wrong password!",
+                  type: "is-danger"
+                });
+              }
+            }
+          })
         }
     }
 }
