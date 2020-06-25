@@ -3,7 +3,8 @@
     <div class="login-7 tab-box">
       <h1>Your Digital Identity</h1>
       <div v-if="isLoading"><br>Loading informations from the blockchain...</div>
-      <div v-if="!isLoading && Object.keys(identities).length === 0"><br>
+      <div v-if="!isLoading && Object.keys(identities).length === 0">
+        <br>These are your <b>public</b> informations:
         <div style="border:1px solid #ccc; text-align:left; color:#000; border-radius:5px; margin-top:20px; font-size:12px; padding:15px">
             <v-gravatar :email="address" style="float:left; height:55px; margin-right:10px;" />
             <strong>LYRA ADDRESS</strong><br>
@@ -11,6 +12,7 @@
             {{ address.substr(0,6) }}...{{ address.substr(-6) }}<br>
         </div>
       </div>
+      
       <div v-if="linked.length > 0">
         <div v-if="!showQRCanvas">
           <br>These are your <b>private</b> informations, share it only with trusted parties:
@@ -203,6 +205,7 @@ export default {
                     let signed = await app.scrypta.signMessage(sid.prv, JSON.stringify(id))
                     for(let y in app.identities){
                       let idB = app.identities[y]
+                      console.log(idB.data.signature, signed.signature)
                       if(idB.data.signature === signed.signature){
                         //PUBLIC VERIFICATION
                         let verify = await app.scrypta.verifyMessage(sid.key, idB.data.signature, JSON.stringify(id))
