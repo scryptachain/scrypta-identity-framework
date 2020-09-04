@@ -171,6 +171,7 @@ export default {
     async mounted (){
       let url = document.URL
       const app = this
+      app.scrypta.staticnodes = true
       let normalized = window.location.href
       let dot = normalized.split('?')
       app.backendURL = dot[0].replace(':8080/',':3000/').replace('/#/','').replace(':3000/',':3000').replace('.id/','.id')

@@ -58,6 +58,7 @@ export default {
     },
     mounted(){
       const app = this
+      app.scrypta.staticnodes = true
       if(app.$route.params.address !== undefined){
         app.isSearching = true
         app.address = app.$route.params.address

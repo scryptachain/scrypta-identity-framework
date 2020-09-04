@@ -88,6 +88,10 @@ export default {
         }
       }
     },
+    mounted(){
+      const app = this
+      app.scrypta.staticnodes = true
+    },
     methods: {
         async onDecode(decodedString){
           const app = this

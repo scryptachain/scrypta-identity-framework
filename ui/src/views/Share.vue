@@ -85,6 +85,7 @@ export default {
     },
     async mounted (){
       const app = this
+      app.scrypta.staticnodes = true
       app.checkIdentity()
     },
     methods: {

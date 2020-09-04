@@ -205,7 +205,6 @@ export default {
                     let signed = await app.scrypta.signMessage(sid.prv, JSON.stringify(id))
                     for(let y in app.identities){
                       let idB = app.identities[y]
-                      console.log(idB.data.signature, signed.signature)
                       if(idB.data.signature === signed.signature){
                         //PUBLIC VERIFICATION
                         let verify = await app.scrypta.verifyMessage(sid.key, idB.data.signature, JSON.stringify(id))

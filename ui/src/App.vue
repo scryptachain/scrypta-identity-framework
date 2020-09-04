@@ -191,8 +191,10 @@ export default {
           onConfirm: async password => {
             let key = await app.scrypta.readKey(password, dataKey);
             if (key !== false) {
+              let SIDS = dataKey.split(':')
               app.scrypta.importPrivateKey(key.prv, password);
               localStorage.setItem("SID", dataKey);
+              localStorage.setItem('sid_backup', SIDS[0])
               location.reload();
             } else {
               app.$buefy.toast.open({
