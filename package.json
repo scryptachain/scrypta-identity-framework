@@ -11,7 +11,7 @@
   "author": "Scrypta Task Force",
   "license": "MIT",
   "dependencies": {
-    "@scrypta/core": "^1.8.2",
+    "@scrypta/core": "^1.9.9",
     "axios": "^0.19.2",
     "coinkey": "^3.0.0",
     "cookie-parser": "^1.4.5",
